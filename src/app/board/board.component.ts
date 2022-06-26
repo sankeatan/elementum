@@ -18,8 +18,8 @@ export class BoardComponent implements OnInit {
     for(let i=0; i<elements.length; i++) {
       let element = elements[i];
       ctx.beginPath();
-      let x = 20+i*20;
-      let y = 20+i*10;
+      let x = 20+i*40;
+      let y = 20+i*20;
       console.log(`${x}, ${y}`);
       ctx.arc(x,y,20,0,2*Math.PI);
       ctx.stroke();
