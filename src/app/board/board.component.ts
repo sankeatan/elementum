@@ -36,19 +36,8 @@ export class BoardComponent implements OnInit {
 
 }
 
-class Client {
-  /* accept user input, send actions to server, accept game state from server, update render */
-}
-
-class Server {
-  /* validate and accept actions from client, update game state, send game state to client */
-}
-
-class Game {
-  /* describes internal state of the game including menues, post game screens, etc */
-}
-
 function drawGame() {
+
   /* create html5 canvas render of game state */
   /* use buffer swapping to update render */
   /* https://stackoverflow.com/questions/2795269/does-html5-canvas-support-double-buffering */
