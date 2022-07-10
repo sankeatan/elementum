@@ -4,9 +4,11 @@
   height="480"
   style="border: 1px solid black">
 </canvas>
-<p>
-  <button (click)="move('up')">Up</button>
-  <button (click)="move('down')">Down</button>
-  <button (click)="move('left')">Left</button>
-  <button (click)="move('right')">Right</button>
-</p>
+
+<div>
+  <select #test>
+    <option *ngFor="let item of names" value={{item}}>{{item}}</option>
+  </select>
+</div>
+
+<button (click)="move(test.value)">Move</button>
