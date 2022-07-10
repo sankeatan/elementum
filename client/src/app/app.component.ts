@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import io from "socket.io-client";
+import { elements, drawBoard } from "./display/elements"
 
 @Component({
   selector: 'app-root',
@@ -22,9 +23,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.context = this.gameCanvas.nativeElement.getContext("2d");
     this.socket.on("position", (position: { x: number; y: number; }): void => {
       console.log(position);
-      this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height);
+      // this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height);
       this.context.fillRect(position.x, position.y, 20, 20);
     })
+
+    drawBoard(this.gameCanvas);
   }
 
   public move(direction: string) {
