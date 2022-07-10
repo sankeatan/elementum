@@ -24,6 +24,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.socket.on("position", (position: { x: number; y: number; }): void => {
       console.log(position);
       // this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height);
+      this.context.fillStyle = "black";
       this.context.fillRect(position.x, position.y, 20, 20);
     })
 
