@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core'
-import { io } from "socket.io-client"
+import { DefaultEventsMap } from '@socket.io/component-emitter'
+import { io, Socket } from "socket.io-client"
 import { elements, drawBoard } from "./display/elements"
 
 @Component({
@@ -10,13 +11,13 @@ import { elements, drawBoard } from "./display/elements"
 export class AppComponent implements OnInit, AfterViewInit {
 
   @ViewChild("game")
-  private gameCanvas!: ElementRef
+  private gameCanvas: ElementRef
 
-  private context: any
-  private socket: any
+  private context: CanvasRenderingContext2D
+  private socket: Socket
 
   public ngOnInit(): void {
-    this.socket = io("http://localhost:3000", { transports : ['websocket'] })
+    this.socket = io("http://localhost:3000", { transports: ['websocket', 'polling', 'flashsocket'] })
   }
 
   private getCursorPosition(canvas: HTMLCanvasElement, event: MouseEvent) {

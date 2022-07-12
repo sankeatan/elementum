@@ -1,14 +1,28 @@
-<canvas
-  #game
-  width="640"
-  height="480"
-  style="border: 1px solid black">
-</canvas>
+<div style="margin: auto; width: fit-content; margin-top: 2rem">
+  <canvas
+    #game
+    width="640"
+    height="480"
+    style="border: 1px solid black">
+  </canvas>
 
-<div>
-  <select #test>
-    <option *ngFor="let item of names" value={{item}}>{{item}}</option>
-  </select>
+  <div>
+    <select #test>
+      <option *ngFor="let item of names" value={{item}}>{{item}}</option>
+    </select>
+  </div>
+
+  <div>
+    <select #test>
+      <option *ngFor="let item of names" value={{item}}>{{item}}</option>
+    </select>
+  </div>
+
+  <div>
+    <select #test>
+      <option *ngFor="let item of names" value={{item}}>{{item}}</option>
+    </select>
+  </div>
+
+  <button (click)="move(test.value)">Submit</button>
 </div>
-
-<button (click)="move(test.value)">Move</button>
