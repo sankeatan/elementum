@@ -66,7 +66,9 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
     }
 
-    this.cards[name].slot = slot;
+    if(name != 'none') {
+      this.cards[name].slot = slot;
+    }
     console.log(this.cards)
   }
 }

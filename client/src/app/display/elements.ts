@@ -51,3 +51,17 @@ export function drawBoard(canvas: ElementRef<HTMLCanvasElement>) {
     console.log(i)
   }
 }
+
+// is testx, testy inside polygon with verticies vertx[...], verty[...]?
+// we can use this for clicking on shapes in the canvas
+// https://stackoverflow.com/questions/2212604/javascript-check-mouse-clicked-inside-the-circle-or-polygon/2212851#2212851
+function pnpoly(nvert, vertx, verty, testx, testy) {
+  var i, j, c = false;
+  for( i = 0, j = nvert-1; i < nvert; j = i++ ) {
+      if( ( ( verty[i] > testy ) != ( verty[j] > testy ) ) &&
+          ( testx < ( vertx[j] - vertx[i] ) * ( testy - verty[i] ) / ( verty[j] - verty[i] ) + vertx[i] ) ) {
+              c = !c;
+      }
+  }
+  return c;
+}
