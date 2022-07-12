@@ -48,5 +48,25 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.socket.emit("move", direction)
   }
 
-  public names = ["up", "down", "left", "right"]
+  public slots = ['attack1', 'attack2', 'defend']
+
+  public cards = {
+    "fire": {"slot": "hand"},
+    "water": {"slot": "hand"},
+    "lightning": {"slot": "hand"},
+    "earth": {"slot": "hand"},
+    "nether": {"slot": "hand"}
+  }
+
+  public takeCard(slot: string, name: string) {
+    for(let card in this.cards) {
+      if(this.cards[card].slot == slot) {
+        this.cards[card].slot = 'hand'
+        break
+      }
+    }
+
+    this.cards[name].slot = slot;
+    console.log(this.cards)
+  }
 }

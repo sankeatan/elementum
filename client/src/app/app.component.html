@@ -6,23 +6,28 @@
     style="border: 1px solid black">
   </canvas>
 
-  <div>
-    <select #test>
-      <option *ngFor="let item of names" value={{item}}>{{item}}</option>
+  <ng-container *ngFor="let slot of slots">
+    <div>
+      <select #thisSlot (change)="takeCard(slot, thisSlot.value)">
+        <option selected disable value="none">no selection</option>
+        <ng-container  *ngFor="let item of cards | keyvalue">
+          <option *ngIf="item.value.slot == 'hand' || (thisSlot.value != 'none' && item.value.slot == cards[thisSlot.value].slot)" value={{item.key}}>{{item.key}}</option>
+        </ng-container>
+      </select>
+    </div>
+  </ng-container>
+
+  <!-- <div>
+    <select #test2>
+      <option *ngFor="let item of hand" value={{item}}>{{item}}</option>
     </select>
   </div>
 
   <div>
-    <select #test>
-      <option *ngFor="let item of names" value={{item}}>{{item}}</option>
+    <select #test3>
+      <option *ngFor="let item of hand" value={{item}}>{{item}}</option>
     </select>
-  </div>
+  </div> -->
 
-  <div>
-    <select #test>
-      <option *ngFor="let item of names" value={{item}}>{{item}}</option>
-    </select>
-  </div>
-
-  <button (click)="move(test.value)">Submit</button>
+  <!-- <button (click)="move(slot1.value)">Submit</button> -->
 </div>
