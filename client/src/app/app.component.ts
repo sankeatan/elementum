@@ -58,7 +58,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     "nether": {"slot": "hand"}
   }
 
-  public takeCard(slot: string, name: string) {
+  public placeCard(slot: string, name: string) {
     for(let card in this.cards) {
       if(this.cards[card].slot == slot) {
         this.cards[card].slot = 'hand'

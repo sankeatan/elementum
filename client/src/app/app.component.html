@@ -1,21 +1,24 @@
-<div style="margin: auto; width: fit-content; margin-top: 2rem">
+<div style="margin: auto; width: fit-content; padding-top: 2rem;">
   <canvas
     #game
     width="640"
     height="480"
     style="border: 1px solid black">
   </canvas>
-
-  <ng-container *ngFor="let slot of slots">
-    <div>
-      <select #thisSlot (change)="takeCard(slot, thisSlot.value)">
-        <option selected disable value="none">no selection</option>
-        <ng-container  *ngFor="let item of cards | keyvalue">
-          <option *ngIf="item.value.slot == 'hand' || (thisSlot.value != 'none' && item.value.slot == cards[thisSlot.value].slot)" value={{item.key}}>{{item.key}}</option>
-        </ng-container>
-      </select>
-    </div>
-  </ng-container>
+  <br>
+  <div style="margin: auto; width: fit-content;">
+    <ng-container *ngFor="let slot of slots">
+      <div style="display: inline-block; margin: 0.5rem 2rem; text-align: center;">
+        <label for="{{slot}}">{{slot}}</label><br>
+        <select #thisSlot (change)="placeCard(slot, thisSlot.value)" name="{{slot}}">
+          <option selected disable value="none">-- empty --</option>
+          <ng-container  *ngFor="let item of cards | keyvalue">
+            <option *ngIf="item.value.slot == 'hand' || (thisSlot.value != 'none' && item.value.slot == cards[thisSlot.value].slot)" value={{item.key}}>{{item.key}}</option>
+          </ng-container>
+        </select>
+      </div>
+    </ng-container>
+  </div>
 
   <!-- <div>
     <select #test2>
