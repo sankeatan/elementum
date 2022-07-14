@@ -1,53 +1,47 @@
 import { ElementRef } from '@angular/core'
+import { DisplayObject, DisplayObjectCircle, GameDisplay } from './display'
 
 export interface Element {
-  stroke: string
-  fill: string
+  strokeStyle: string
+  fillStyle: string
   name: string
 }
 
 export const elements = [
 {
-  stroke: "orange",
-  fill: "darkred",
+  strokeStyle: "orange",
+  fillStyle: "darkred",
   name: "fire",
 },
 {
-  stroke: "aqua",
-  fill: "darkblue",
+  strokeStyle: "aqua",
+  fillStyle: "darkblue",
   name: "water",
 },
 {
-  stroke: "darkgreen",
-  fill: "#776600",
+  strokeStyle: "darkgreen",
+  fillStyle: "#776600",
   name: "earth",
 },
 {
-  stroke: "blue",
-  fill: "#dddd33",
+  strokeStyle: "blue",
+  fillStyle: "#dddd33",
   name: "electricity",
 },
 {
-  stroke: "purple",
-  fill: "#330033",
+  strokeStyle: "purple",
+  fillStyle: "#330033",
   name: "nether",
 },
 ]
 
-export function drawBoard(canvas: ElementRef<HTMLCanvasElement>) {
-  let ctx = canvas.nativeElement.getContext("2d")!
+export function initElements(display: GameDisplay) {
   for(let i=0; i<elements.length; i++) {
     let element = elements[i]
-    ctx.beginPath()
-    let x = canvas.nativeElement.width/2+150*Math.cos(-Math.PI/2 + i*2*Math.PI/elements.length)
-    let y = canvas.nativeElement.height/2+150*Math.sin(-Math.PI/2 + i*2*Math.PI/elements.length)
+    let x = 640/2+150*Math.cos(-Math.PI/2 + i*2*Math.PI/elements.length)
+    let y = 480/2+150*Math.sin(-Math.PI/2 + i*2*Math.PI/elements.length)
+    display.add(new DisplayObjectCircle(x, y, 50, elements[i]))
     console.log(`${x}, ${y}`)
-    ctx.arc(x,y,75,0,2*Math.PI)
-    ctx.strokeStyle = element.stroke
-    ctx.lineWidth = 6
-    ctx.stroke()
-    ctx.fillStyle = element.fill
-    ctx.fill()
     console.log(i)
   }
 }

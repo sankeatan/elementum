@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core'
 import { DefaultEventsMap } from '@socket.io/component-emitter'
 import { io, Socket } from "socket.io-client"
-import { elements, drawBoard } from "./display/elements"
+import { elements, initElements } from "./display/elements"
 import { GameDisplay, DisplayObjectPolygon } from "./display/display"
 
 @Component({
@@ -34,12 +34,13 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.socket.on("position", (position: { x: number; y: number }): void => {
       console.log(position)
       // this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
-      this.context.fillStyle = "black"
-      this.context.fillRect(position.x, position.y, 20, 20)
+      // this.context.fillStyle = "black"
+      // this.context.fillRect(position.x, position.y, 20, 20)
     })
 
     // drawBoard(this.gameCanvas)
     let x = new GameDisplay(this.context, 200, 200)
+    initElements(x)
     x.draw()
 
     this.gameCanvas.nativeElement.addEventListener("click", (event: MouseEvent) => {
