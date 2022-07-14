@@ -2,14 +2,15 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angula
 import { DefaultEventsMap } from '@socket.io/component-emitter'
 import { io, Socket } from "socket.io-client"
 import { elements, drawBoard } from "./display/elements"
+import { GameDisplay, DisplayObjectPolygon } from "./display/display"
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit, AfterViewInit {
 
+export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild("game")
   private gameCanvas: ElementRef
 
@@ -36,7 +37,9 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.context.fillRect(position.x, position.y, 20, 20)
     })
 
-    drawBoard(this.gameCanvas)
+    // drawBoard(this.gameCanvas)
+    let x = new GameDisplay(this.context, 200, 200)
+    x.draw()
 
     this.gameCanvas.nativeElement.addEventListener("click", (event: MouseEvent) => {
       this.getCursorPosition(this.gameCanvas.nativeElement, event)
