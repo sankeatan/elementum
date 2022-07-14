@@ -26,6 +26,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     const x = event.clientX - rect.left
     const y = event.clientY - rect.top
     console.log("x: " + x + " y: " + y)
+    return {x: x, y: y}
   }
 
   public ngAfterViewInit(): void {
@@ -42,7 +43,8 @@ export class AppComponent implements OnInit, AfterViewInit {
     x.draw()
 
     this.gameCanvas.nativeElement.addEventListener("click", (event: MouseEvent) => {
-      this.getCursorPosition(this.gameCanvas.nativeElement, event)
+      let pos = this.getCursorPosition(this.gameCanvas.nativeElement, event)
+      console.log(x.somethingClicked(pos.x, pos.y))
     })
   }
 

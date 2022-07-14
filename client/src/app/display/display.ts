@@ -16,6 +16,16 @@ export class GameDisplay {
             displayObject.draw(this.ctx)
         })
     }
+
+    somethingClicked(x: number, y: number) {
+        for(let i=0; i<this.displayObjects.length; i++) {
+            if(this.displayObjects[i].isInside(x, y)) {
+                return true
+            }
+        }
+
+        return false
+    }
 }
 
 export abstract class DisplayObject {
@@ -31,8 +41,6 @@ export abstract class DisplayObject {
     abstract draw(ctx: CanvasRenderingContext2D): void
 }
 
-// width, height, x, y, rotation, isInside(x, y)
-
 // class DisplayObjectRectangle extends DisplayObject {
 //     width: number; height: number
 // }
@@ -42,8 +50,10 @@ export abstract class DisplayObject {
 // }
 
 export class DisplayObjectPolygon extends DisplayObject {
-    vertices: {x: number, y: number}[] = [{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]
+    vertices: {x: number, y: number}[] = [{x: -10, y: -10}, {x: 10, y: 0}, {x: 10, y: 10}, {x: -10, y: 10}]
     isInside(x: number, y: number) {
+        x -= this.pos_x
+        y -= this.pos_y
         let i: number, j: number, c: boolean = false
         for( i = 0, j = this.vertices.length-1; i < this.vertices.length; j = i++ ) {
             if( ( ( this.vertices[i].y > y ) != ( this.vertices[j].y > y ) ) &&
