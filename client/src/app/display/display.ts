@@ -10,13 +10,13 @@ export class GameDisplay {
         this.ctx = ctx
     }
 
-    draw() {
+    draw(): void {
         this.displayObjects.forEach((displayObject) => {
             displayObject.draw(this.ctx)
         })
     }
 
-    somethingClicked(x: number, y: number) {
+    somethingClicked(x: number, y: number): boolean {
         for(let i=0; i<this.displayObjects.length; i++) {
             if(this.displayObjects[i].isInside(x, y)) {
                 return true
@@ -26,7 +26,7 @@ export class GameDisplay {
         return false
     }
 
-    add(displayObject: DisplayObject) {
+    add(displayObject: DisplayObject): void {
         this.displayObjects.push(displayObject)
     }
 }
@@ -48,7 +48,7 @@ export abstract class DisplayObject {
         }
     }
 
-    applyStyle(ctx: CanvasRenderingContext2D) {
+    applyStyle(ctx: CanvasRenderingContext2D): void {
         for(const property in this.style) {
             ctx[property] = this.style[property]
         }
@@ -58,9 +58,35 @@ export abstract class DisplayObject {
     abstract draw(ctx: CanvasRenderingContext2D): void
 }
 
-// export class DisplayObjectRectangle extends DisplayObject {
-//     width: number; height: number
-// }
+export class DisplayObjectRectangle extends DisplayObject {
+    width: number
+    height: number
+
+    constructor(x_pos: number, y_pos: number, width: number, height: number, style?: {}) {
+        super(x_pos, y_pos, style)
+        this.width = width
+        this.height = height
+    }
+
+    isInside(x: number, y: number): boolean {
+        x -= this.x_pos
+        y -= this.y_pos
+        return x >= -this.width/2 && x <= this.width/2 && y >= -this.height/2 && y <= this.height/2
+    }
+
+    draw(ctx: CanvasRenderingContext2D): void {
+        this.applyStyle(ctx)
+        ctx.beginPath()
+        ctx.moveTo(this.x_pos-this.width/2, this.y_pos-this.height/2)
+        ctx.lineTo(this.x_pos+this.width/2, this.y_pos-this.height/2)
+        ctx.lineTo(this.x_pos+this.width/2, this.y_pos+this.height/2)
+        ctx.lineTo(this.x_pos-this.width/2, this.y_pos+this.height/2)
+        ctx.lineTo(this.x_pos-this.width/2, this.y_pos-this.height/2)
+        ctx.closePath()
+        ctx.stroke()
+        ctx.fill()
+    }
+}
 
 export class DisplayObjectCircle extends DisplayObject {
     radius: number
@@ -74,7 +100,7 @@ export class DisplayObjectCircle extends DisplayObject {
         return Math.pow((x-this.x_pos),2) + Math.pow((y-this.y_pos),2) <= Math.pow(this.radius,2)
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    draw(ctx: CanvasRenderingContext2D): void {
         this.applyStyle(ctx)
         ctx.beginPath()
         ctx.arc(this.x_pos, this.y_pos, this.radius, 0, 2*Math.PI)
@@ -108,7 +134,7 @@ export class DisplayObjectPolygon extends DisplayObject {
         return c
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    draw(ctx: CanvasRenderingContext2D): void {
         this.applyStyle(ctx)
         ctx.beginPath()
         ctx.moveTo(this.x_pos + this.vertices[0][0], this.y_pos + this.vertices[0][1])
@@ -117,8 +143,8 @@ export class DisplayObjectPolygon extends DisplayObject {
         }
         ctx.lineTo(this.x_pos, this.y_pos)
         ctx.closePath()
-        ctx.fill()
         ctx.stroke()
+        ctx.fill()
     }
 }
 
