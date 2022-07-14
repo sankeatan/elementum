@@ -51,6 +51,8 @@ export abstract class DisplayObject {
 
 export class DisplayObjectPolygon extends DisplayObject {
     vertices: {x: number, y: number}[] = [{x: -10, y: -10}, {x: 10, y: 0}, {x: 10, y: 10}, {x: -10, y: 10}]
+
+    // https://stackoverflow.com/questions/2212604/javascript-check-mouse-clicked-inside-the-circle-or-polygon/2212851#2212851
     isInside(x: number, y: number) {
         x -= this.pos_x
         y -= this.pos_y
