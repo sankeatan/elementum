@@ -1,8 +1,8 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core'
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, HostListener } from '@angular/core'
 import { DefaultEventsMap } from '@socket.io/component-emitter'
-import { io, Socket } from "socket.io-client"
-import { elements, initElements } from "./display/elements"
-import { CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from "./display/display"
+import { io, Socket } from 'socket.io-client'
+import { elements, initElements } from './display/elements'
+import { CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/display'
 
 @Component({
   selector: 'app-root',
@@ -79,5 +79,11 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.cards[name].slot = slot;
     }
     console.log(this.cards)
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  keyEvent(event: KeyboardEvent) {
+    // event.preventDefault() // use this to prevent default behavior for keys used for the game
+    console.log(event)
   }
 }

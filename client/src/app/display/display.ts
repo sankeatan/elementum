@@ -1,5 +1,7 @@
 export class CanvasEntityCollection {
     private displayObjects: CanvasEntity[] = []
+    // not used currently. may want to implement for scaling the collection for different canvas sizes
+    public scale: number = 1.0
 
     draw(ctx: CanvasRenderingContext2D): void {
         this.displayObjects.forEach(element => {
@@ -77,7 +79,6 @@ export class RectangleCanvasEntity extends CanvasEntity {
         ctx.lineTo(this.x_pos+this.width/2, this.y_pos-this.height/2)
         ctx.lineTo(this.x_pos+this.width/2, this.y_pos+this.height/2)
         ctx.lineTo(this.x_pos-this.width/2, this.y_pos+this.height/2)
-        ctx.lineTo(this.x_pos-this.width/2, this.y_pos-this.height/2)
         ctx.closePath()
         ctx.stroke()
         ctx.fill()
