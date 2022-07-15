@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angula
 import { DefaultEventsMap } from '@socket.io/component-emitter'
 import { io, Socket } from "socket.io-client"
 import { elements, initElements } from "./display/elements"
-import { GameDisplay, DisplayObjectPolygon, DisplayObjectRectangle } from "./display/display"
+import { DisplayObjectCollection, DisplayObjectPolygon, DisplayObjectRectangle } from "./display/display"
 
 @Component({
   selector: 'app-root',
@@ -36,15 +36,19 @@ export class AppComponent implements OnInit, AfterViewInit {
     })
 
     // drawBoard(this.gameCanvas)
-    let x = new GameDisplay(this.context, 200, 200)
+    let x = new DisplayObjectCollection()
     initElements(x)
     x.add(new DisplayObjectRectangle(60, 110, 100, 200))
     this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
-    x.draw()
+    x.draw(this.context)
 
     this.gameCanvas.nativeElement.addEventListener("click", (event: MouseEvent) => {
       let pos = this.getCursorPosition(this.gameCanvas.nativeElement, event)
-      console.log(x.somethingClicked(pos.x, pos.y))
+      let obj = x.getClicked(pos.x, pos.y, true)
+      let color = obj ? obj.style['fillStyle'] : 'black'
+      console.log("%c Shape clicked?", `background: ${color}`)
+      this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height);
+      x.draw(this.context)
     })
   }
 

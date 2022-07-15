@@ -1,5 +1,5 @@
 import { ElementRef } from '@angular/core'
-import { DisplayObject, DisplayObjectCircle, GameDisplay } from './display'
+import { DisplayObject, DisplayObjectCircle, DisplayObjectCollection } from './display'
 
 export interface Element {
   strokeStyle: string
@@ -35,12 +35,12 @@ export const elements = [
 },
 ]
 
-export function initElements(display: GameDisplay) {
+export function initElements(display: DisplayObjectCollection) {
   for(let i=0; i<elements.length; i++) {
     let element = elements[i]
     let x = 640/2+150*Math.cos(-Math.PI/2 + i*2*Math.PI/elements.length)
     let y = 480/2+150*Math.sin(-Math.PI/2 + i*2*Math.PI/elements.length)
-    display.add(new DisplayObjectCircle(x, y, 50, elements[i]))
+    display.add(new DisplayObjectCircle(x, y, 150, elements[i]))
     console.log(`${x}, ${y}`)
     console.log(i)
   }

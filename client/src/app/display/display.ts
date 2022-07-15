@@ -1,29 +1,25 @@
-export class GameDisplay {
-    private ctx: CanvasRenderingContext2D
+export class DisplayObjectCollection {
     private displayObjects: DisplayObject[] = []
-    private width: number
-    private height: number
 
-    constructor(ctx: CanvasRenderingContext2D, width: number, height: number) {
-        this.width = width
-        this.height = height
-        this.ctx = ctx
-    }
-
-    draw(): void {
-        this.displayObjects.forEach((displayObject) => {
-            displayObject.draw(this.ctx)
+    draw(ctx: CanvasRenderingContext2D): void {
+        this.displayObjects.forEach(element => {
+            element.draw(ctx)
         })
     }
 
-    somethingClicked(x: number, y: number): boolean {
-        for(let i=0; i<this.displayObjects.length; i++) {
-            if(this.displayObjects[i].isInside(x, y)) {
-                return true
+    getClicked(x: number, y: number, bringToFront: boolean = false): DisplayObject {
+        for(let i=this.displayObjects.length-1; i>=0; i--) {
+            let clicked_obj = this.displayObjects[i]
+            if(clicked_obj.isInside(x, y)) {
+                if(bringToFront) {
+                    // move the clicked object to the end of the array
+                    this.displayObjects.push(this.displayObjects.splice(i,1)[0])
+                }
+                return clicked_obj
             }
         }
 
-        return false
+        return null
     }
 
     add(displayObject: DisplayObject): void {
@@ -38,7 +34,7 @@ export abstract class DisplayObject {
     style: {} = {
         fillStyle: '#f1f',
         strokeStyle: '#000',
-        lineWidth: 1
+        lineWidth: 6
     }
     constructor(x_pos: number, y_pos: number, style?: {}) {
         this.x_pos = x_pos
