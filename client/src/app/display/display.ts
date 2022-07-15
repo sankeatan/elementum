@@ -1,5 +1,5 @@
-export class DisplayObjectCollection {
-    private displayObjects: DisplayObject[] = []
+export class CanvasEntityCollection {
+    private displayObjects: CanvasEntity[] = []
 
     draw(ctx: CanvasRenderingContext2D): void {
         this.displayObjects.forEach(element => {
@@ -7,7 +7,7 @@ export class DisplayObjectCollection {
         })
     }
 
-    getClicked(x: number, y: number, bringToFront: boolean = false): DisplayObject {
+    getClicked(x: number, y: number, bringToFront: boolean = false): CanvasEntity {
         for(let i=this.displayObjects.length-1; i>=0; i--) {
             let clicked_obj = this.displayObjects[i]
             if(clicked_obj.isInside(x, y)) {
@@ -22,12 +22,12 @@ export class DisplayObjectCollection {
         return null
     }
 
-    add(displayObject: DisplayObject): void {
+    add(displayObject: CanvasEntity): void {
         this.displayObjects.push(displayObject)
     }
 }
 
-export abstract class DisplayObject {
+export abstract class CanvasEntity {
     x_pos: number = 0
     y_pos: number = 0
     rotation: number = 0
@@ -54,7 +54,7 @@ export abstract class DisplayObject {
     abstract draw(ctx: CanvasRenderingContext2D): void
 }
 
-export class DisplayObjectRectangle extends DisplayObject {
+export class RectangleCanvasEntity extends CanvasEntity {
     width: number
     height: number
 
@@ -84,7 +84,7 @@ export class DisplayObjectRectangle extends DisplayObject {
     }
 }
 
-export class DisplayObjectCircle extends DisplayObject {
+export class CircleCanvasEntity extends CanvasEntity {
     radius: number
 
     constructor(x_pos: number, y_pos: number, radius: number, style?: {}) {
@@ -105,7 +105,7 @@ export class DisplayObjectCircle extends DisplayObject {
     }
 }
 
-export class DisplayObjectPolygon extends DisplayObject {
+export class PolygonCanvasEntity extends CanvasEntity {
     private vertices: [x: number, y: number][]
 
     constructor(x_pos: number, y_pos: number, vertices: [number, number][], style?: {}) {
@@ -144,6 +144,6 @@ export class DisplayObjectPolygon extends DisplayObject {
     }
 }
 
-// class DisplayObjectImage implements DisplayObject {
+// class CanvasEntityImage implements CanvasEntity {
 //     path: string
 // }

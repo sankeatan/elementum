@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angula
 import { DefaultEventsMap } from '@socket.io/component-emitter'
 import { io, Socket } from "socket.io-client"
 import { elements, initElements } from "./display/elements"
-import { DisplayObjectCollection, DisplayObjectPolygon, DisplayObjectRectangle } from "./display/display"
+import { CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from "./display/display"
 
 @Component({
   selector: 'app-root',
@@ -36,9 +36,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     })
 
     // drawBoard(this.gameCanvas)
-    let x = new DisplayObjectCollection()
+    let x = new CanvasEntityCollection()
     initElements(x)
-    x.add(new DisplayObjectRectangle(60, 110, 100, 200))
+    x.add(new RectangleCanvasEntity(60, 110, 100, 200))
     this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
     x.draw(this.context)
 
