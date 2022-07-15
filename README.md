@@ -5,4 +5,5 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 ## Setup
 
 In the client directory, run ng serve
+
 In the server directory, run npm start
