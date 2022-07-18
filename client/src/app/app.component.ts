@@ -4,6 +4,7 @@ import { io, Socket } from 'socket.io-client'
 import { elements, initElements } from './display/elements'
 import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/display'
 import { clamp } from './utility'
+import { game } from '../../../shared/gameState'
 
 @Component({
   selector: 'app-root',
@@ -86,6 +87,10 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.cards[name].slot = slot;
     }
     console.log(this.cards)
+  }
+
+  public playCards(player: string, attack1: string, attack2: string, defend: string){
+    this.socket.emit("playCards", player, attack1, attack2, defend);
   }
 
   @HostListener('window:keydown', ['$event'])

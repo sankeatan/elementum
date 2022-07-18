@@ -1,3 +1,5 @@
+import { game } from '../shared/gameState';
+
 const Express = require("express")()
 const Http = require("http").Server(Express)
 const Socketio = require("socket.io")(Http)
@@ -19,6 +21,55 @@ Socketio.on("connection", socket => {
 
         Socketio.emit("position", position)
     })
+})
+
+Socketio.on("playCards", (player, attack1, attack2, defend) => {
+    if(player == 'player1'){
+        switch(defend){
+            case 'fire': game.player1.fire = !game.player1.fire; break
+            case 'water': game.player1.water = !game.player1.water; break
+            case 'earth': game.player1.earth = !game.player1.earth; break
+            case 'electricity': game.player1.electricity = !game.player1.electricity; break
+            case 'nether': game.player1.nether = !game.player1.nether; break
+        }
+        switch(attack1){
+            case 'fire': game.player2.fire = !game.player2.fire; break
+            case 'water': game.player2.water = !game.player2.water; break
+            case 'earth': game.player2.earth = !game.player2.earth; break
+            case 'electricity': game.player2.electricity = !game.player2.electricity; break
+            case 'nether': game.player2.nether = !game.player2.nether; break
+        }
+        switch(attack2){
+            case 'fire': game.player2.fire = !game.player2.fire; break
+            case 'water': game.player2.water = !game.player2.water; break
+            case 'earth': game.player2.earth = !game.player2.earth; break
+            case 'electricity': game.player2.electricity = !game.player2.electricity; break
+            case 'nether': game.player2.nether = !game.player2.nether; break
+        }
+    } else {
+        switch(defend){
+            case 'fire': game.player2.fire = !game.player2.fire; break
+            case 'water': game.player2.water = !game.player2.water; break
+            case 'earth': game.player2.earth = !game.player2.earth; break
+            case 'electricity': game.player2.electricity = !game.player2.electricity; break
+            case 'nether': game.player2.nether = !game.player2.nether; break
+        }
+        switch(attack1){
+            case 'fire': game.player1.fire = !game.player1.fire; break
+            case 'water': game.player1.water = !game.player1.water; break
+            case 'earth': game.player1.earth = !game.player1.earth; break
+            case 'electricity': game.player1.electricity = !game.player1.electricity; break
+            case 'nether': game.player1.nether = !game.player1.nether; break
+        }
+        switch(attack2){
+            case 'fire': game.player1.fire = !game.player1.fire; break
+            case 'water': game.player1.water = !game.player1.water; break
+            case 'earth': game.player1.earth = !game.player1.earth; break
+            case 'electricity': game.player1.electricity = !game.player1.electricity; break
+            case 'nether': game.player1.nether = !game.player1.nether; break
+        }
+
+    }
 })
 
 Http.listen(3000, () => {
