@@ -33,11 +33,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.socket = io("http://localhost:3000", { transports: ['websocket', 'polling', 'flashsocket'] })
   }
 
-  private getCursorPosition(canvas: HTMLCanvasElement, event: MouseEvent) {
-    const rect = canvas.getBoundingClientRect()
-    const x = event.clientX - rect.left
-    const y = event.clientY - rect.top
-    console.log("x: " + x + " y: " + y)
+  private getCursorPosition(event: MouseEvent) {
+    const x = event.clientX - this.contextBoundLeft
+    const y = event.clientY - this.contextBoundTop
     return {x: x, y: y}
   }
 
@@ -113,10 +111,11 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   @HostListener('window:mousedown', ['$event'])
   mouseDown(event: MouseEvent) {
-    this.grabbedEntity = this.collection.getClicked(event.clientX-this.contextBoundLeft, event.clientY-this.contextBoundTop, true)
+    let mousePosition = this.getCursorPosition(event)
+    this.grabbedEntity = this.collection.getClicked(mousePosition.x, mousePosition.y, true)
     if(this.grabbedEntity) {
-      this.grabbedOffsetX = (event.clientX-this.contextBoundLeft) - this.grabbedEntity.x_pos
-      this.grabbedOffsetY = (event.clientY-this.contextBoundTop) - this.grabbedEntity.y_pos
+      this.grabbedOffsetX = mousePosition.x - this.grabbedEntity.x_pos
+      this.grabbedOffsetY = mousePosition.y - this.grabbedEntity.y_pos
       this.grabbedEntity.draw(this.context)
     }
   }
