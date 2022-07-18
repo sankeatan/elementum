@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, HostListener }
 import { DefaultEventsMap } from '@socket.io/component-emitter'
 import { io, Socket } from 'socket.io-client'
 import { elements, initElements } from './display/elements'
-import { CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/display'
+import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/display'
 
 @Component({
   selector: 'app-root',
@@ -16,6 +16,10 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   private context: CanvasRenderingContext2D
   private socket: Socket
+
+  private collection: CanvasEntityCollection = new CanvasEntityCollection()
+
+  private grabbedEntity: CanvasEntity = null
 
   public ngOnInit(): void {
     this.socket = io("http://localhost:3000", { transports: ['websocket', 'polling', 'flashsocket'] })
@@ -36,19 +40,18 @@ export class AppComponent implements OnInit, AfterViewInit {
     })
 
     // drawBoard(this.gameCanvas)
-    let x = new CanvasEntityCollection()
-    initElements(x)
-    x.add(new RectangleCanvasEntity(60, 110, 100, 200))
+    initElements(this.collection)
+    this.collection.add(new RectangleCanvasEntity(60, 110, 100, 200))
     this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
-    x.draw(this.context)
+    this.collection.draw(this.context)
 
     this.gameCanvas.nativeElement.addEventListener("click", (event: MouseEvent) => {
-      let pos = this.getCursorPosition(this.gameCanvas.nativeElement, event)
-      let obj = x.getClicked(pos.x, pos.y, true)
-      let color = obj ? obj.style['fillStyle'] : 'black'
-      console.log("%c Shape clicked?", `background: ${color}`)
-      this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height);
-      x.draw(this.context)
+      // let pos = this.getCursorPosition(this.gameCanvas.nativeElement, event)
+      // let obj = this.collection.getClicked(pos.x, pos.y, true)
+      // let color = obj ? obj.style['fillStyle'] : 'black'
+      // console.log("%c Shape clicked?", `background: ${color}`)
+      // this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height);
+      // this.collection.draw(this.context)
     })
   }
 
@@ -83,7 +86,43 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   @HostListener('window:keydown', ['$event'])
   keyEvent(event: KeyboardEvent) {
+    console.log(event.code)
     // event.preventDefault() // use this to prevent default behavior for keys used for the game
     console.log(event)
+  }
+
+  @HostListener('window:mousedown', ['$event'])
+  mouseDown(event: MouseEvent) {
+    this.grabbedEntity = this.collection.getClicked(event.clientX-this.gameCanvas.nativeElement.getBoundingClientRect().left, event.clientY-this.gameCanvas.nativeElement.getBoundingClientRect().top)
+  }
+
+  @HostListener('window:mouseup', ['$event'])
+  mouseUp(event: MouseEvent) {
+    this.grabbedEntity = null
+  }
+
+  @HostListener('window:mousemove', ['$event'])
+  mouseMove(event: MouseEvent): void {
+    if(this.grabbedEntity == null) {
+      return
+    }
+    let rightBound = this.gameCanvas.nativeElement.getBoundingClientRect().right
+    let leftBound = this.gameCanvas.nativeElement.getBoundingClientRect().left
+    let topBound = this.gameCanvas.nativeElement.getBoundingClientRect().top
+    let bottomBound = this.gameCanvas.nativeElement.getBoundingClientRect().bottom
+    const x = event.clientX - leftBound
+    const y = event.clientY - topBound
+    let redraw: boolean = false
+    if(event.clientX >= leftBound && event.clientX <= rightBound) {
+      this.grabbedEntity.x_pos = event.clientX - leftBound
+      redraw = true
+    }
+    if(event.clientY >= topBound && event.clientY <= bottomBound) {
+      this.grabbedEntity.y_pos = event.clientY - topBound
+      redraw = true
+    }
+    if(redraw) {
+      this.collection.draw(this.context)
+    }
   }
 }

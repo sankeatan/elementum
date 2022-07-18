@@ -4,6 +4,8 @@ export class CanvasEntityCollection {
     public scale: number = 1.0
 
     draw(ctx: CanvasRenderingContext2D): void {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
         this.displayObjects.forEach(element => {
             element.draw(ctx)
         })
