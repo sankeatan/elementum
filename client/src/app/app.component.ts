@@ -3,6 +3,7 @@ import { DefaultEventsMap } from '@socket.io/component-emitter'
 import { io, Socket } from 'socket.io-client'
 import { elements, initElements } from './display/elements'
 import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/display'
+import { clamp } from './utility'
 
 @Component({
   selector: 'app-root',
@@ -15,11 +16,18 @@ export class AppComponent implements OnInit, AfterViewInit {
   private gameCanvas: ElementRef
 
   private context: CanvasRenderingContext2D
+  private contextBoundRight: number = 0
+  private contextBoundLeft: number = 0
+  private contextBoundTop: number = 0
+  private contextBoundBottom: number = 0
+
   private socket: Socket
 
   private collection: CanvasEntityCollection = new CanvasEntityCollection()
 
   private grabbedEntity: CanvasEntity = null
+  private grabbedOffsetX: number = 0
+  private grabbedOffsetY: number = 0
 
   public ngOnInit(): void {
     this.socket = io("http://localhost:3000", { transports: ['websocket', 'polling', 'flashsocket'] })
@@ -35,6 +43,10 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   public ngAfterViewInit(): void {
     this.context = this.gameCanvas.nativeElement.getContext("2d")
+    this.contextBoundRight = this.gameCanvas.nativeElement.getBoundingClientRect().right
+    this.contextBoundLeft = this.gameCanvas.nativeElement.getBoundingClientRect().left
+    this.contextBoundTop = this.gameCanvas.nativeElement.getBoundingClientRect().top
+    this.contextBoundBottom = this.gameCanvas.nativeElement.getBoundingClientRect().bottom
     this.socket.on("position", (position: { x: number; y: number }): void => {
       console.log(position)
     })
@@ -93,7 +105,12 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   @HostListener('window:mousedown', ['$event'])
   mouseDown(event: MouseEvent) {
-    this.grabbedEntity = this.collection.getClicked(event.clientX-this.gameCanvas.nativeElement.getBoundingClientRect().left, event.clientY-this.gameCanvas.nativeElement.getBoundingClientRect().top)
+    this.grabbedEntity = this.collection.getClicked(event.clientX-this.contextBoundLeft, event.clientY-this.contextBoundTop, true)
+    if(this.grabbedEntity) {
+      this.grabbedOffsetX = (event.clientX-this.contextBoundLeft) - this.grabbedEntity.x_pos
+      this.grabbedOffsetY = (event.clientY-this.contextBoundTop) - this.grabbedEntity.y_pos
+      this.grabbedEntity.draw(this.context)
+    }
   }
 
   @HostListener('window:mouseup', ['$event'])
@@ -106,19 +123,17 @@ export class AppComponent implements OnInit, AfterViewInit {
     if(this.grabbedEntity == null) {
       return
     }
-    let rightBound = this.gameCanvas.nativeElement.getBoundingClientRect().right
-    let leftBound = this.gameCanvas.nativeElement.getBoundingClientRect().left
-    let topBound = this.gameCanvas.nativeElement.getBoundingClientRect().top
-    let bottomBound = this.gameCanvas.nativeElement.getBoundingClientRect().bottom
-    const x = event.clientX - leftBound
-    const y = event.clientY - topBound
+    const x = event.clientX - this.contextBoundLeft
+    const y = event.clientY - this.contextBoundTop
     let redraw: boolean = false
-    if(event.clientX >= leftBound && event.clientX <= rightBound) {
-      this.grabbedEntity.x_pos = event.clientX - leftBound
+    if(event.clientX >= this.contextBoundLeft && event.clientX <= this.contextBoundRight) {
+      let newPosition = event.clientX - this.contextBoundLeft - this.grabbedOffsetX
+      this.grabbedEntity.x_pos = clamp(newPosition, 0, this.gameCanvas.nativeElement.width)
       redraw = true
     }
-    if(event.clientY >= topBound && event.clientY <= bottomBound) {
-      this.grabbedEntity.y_pos = event.clientY - topBound
+    if(event.clientY >= this.contextBoundTop && event.clientY <= this.contextBoundBottom) {
+      let newPosition = event.clientY - this.contextBoundTop - this.grabbedOffsetY
+      this.grabbedEntity.y_pos = clamp(newPosition, 0, this.gameCanvas.nativeElement.height)
       redraw = true
     }
     if(redraw) {
