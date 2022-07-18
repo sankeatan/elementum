@@ -33,20 +33,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.socket = io("http://localhost:3000", { transports: ['websocket', 'polling', 'flashsocket'] })
   }
 
-  private getCursorPosition(event: MouseEvent) {
-    const x = event.clientX - this.contextBoundLeft
-    const y = event.clientY - this.contextBoundTop
-    return {x: x, y: y}
-  }
-
-  private canvasClampX(input: number) {
-    return clamp(input, 0, this.gameCanvas.nativeElement.width)
-  }
-
-  private canvasClampY(input: number) {
-    return clamp(input, 0, this.gameCanvas.nativeElement.height)
-  }
-
   public ngAfterViewInit(): void {
     this.context = this.gameCanvas.nativeElement.getContext("2d")
     this.contextBoundRight = this.gameCanvas.nativeElement.getBoundingClientRect().right
@@ -62,20 +48,20 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.collection.add(new RectangleCanvasEntity(60, 110, 100, 200))
     this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
     this.collection.draw(this.context)
-
-    this.gameCanvas.nativeElement.addEventListener("click", (event: MouseEvent) => {
-      // let pos = this.getCursorPosition(this.gameCanvas.nativeElement, event)
-      // let obj = this.collection.getClicked(pos.x, pos.y, true)
-      // let color = obj ? obj.style['fillStyle'] : 'black'
-      // console.log("%c Shape clicked?", `background: ${color}`)
-      // this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height);
-      // this.collection.draw(this.context)
-    })
   }
 
-  public move(direction: string) {
-    console.log(direction)
-    this.socket.emit("move", direction)
+  private getCursorPosition(event: MouseEvent) {
+    const x = event.clientX - this.contextBoundLeft
+    const y = event.clientY - this.contextBoundTop
+    return {x: x, y: y}
+  }
+
+  private canvasClampX(input: number) {
+    return clamp(input, 0, this.gameCanvas.nativeElement.width)
+  }
+
+  private canvasClampY(input: number) {
+    return clamp(input, 0, this.gameCanvas.nativeElement.height)
   }
 
   public slots = ['attack1', 'attack2', 'defend']

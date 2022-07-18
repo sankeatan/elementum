@@ -32,19 +32,26 @@ export class CanvasEntityCollection {
 }
 
 export abstract class CanvasEntity {
+    fixed: boolean = false
     x_pos: number = 0
     y_pos: number = 0
     rotation: number = 0
     style: {} = {
-        fillStyle: '#f1f',
+        fillStyle: 'beige',//'#f1f',
         strokeStyle: '#000',
         lineWidth: 6
     }
-    constructor(x_pos: number, y_pos: number, style?: {}) {
+    constructor(x_pos: number, y_pos: number, options?: object) {
         this.x_pos = x_pos
         this.y_pos = y_pos
-        for(const property in style) {
-            this.style[property] = style[property]
+        for(const option in options) {
+            // TODO: Might want to address runtime falibility of these dynamic options/suboptions
+            if(typeof options[option] == 'object') {
+                for(const suboption in options[option]) {
+                    this[option][suboption] = options[option][suboption]
+                }
+            }
+            else this[option] = options[option]
         }
     }
 
@@ -62,8 +69,8 @@ export class RectangleCanvasEntity extends CanvasEntity {
     width: number
     height: number
 
-    constructor(x_pos: number, y_pos: number, width: number, height: number, style?: {}) {
-        super(x_pos, y_pos, style)
+    constructor(x_pos: number, y_pos: number, width: number, height: number, options?: {}) {
+        super(x_pos, y_pos, options)
         this.width = width
         this.height = height
     }
@@ -90,8 +97,8 @@ export class RectangleCanvasEntity extends CanvasEntity {
 export class CircleCanvasEntity extends CanvasEntity {
     radius: number
 
-    constructor(x_pos: number, y_pos: number, radius: number, style?: {}) {
-        super(x_pos, y_pos, style)
+    constructor(x_pos: number, y_pos: number, radius: number, options?: {}) {
+        super(x_pos, y_pos, options)
         this.radius = radius
     }
 
@@ -111,8 +118,8 @@ export class CircleCanvasEntity extends CanvasEntity {
 export class PolygonCanvasEntity extends CanvasEntity {
     private vertices: [x: number, y: number][]
 
-    constructor(x_pos: number, y_pos: number, vertices: [number, number][], style?: {}) {
-        super(x_pos, y_pos, style)
+    constructor(x_pos: number, y_pos: number, vertices: [number, number][], options?: {}) {
+        super(x_pos, y_pos, options)
         vertices.forEach(vertex => {
             this.vertices.push([vertex[0], vertex[1]])
         })
