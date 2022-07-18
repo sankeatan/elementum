@@ -41,6 +41,14 @@ export class AppComponent implements OnInit, AfterViewInit {
     return {x: x, y: y}
   }
 
+  private canvasClampX(input: number) {
+    return clamp(input, 0, this.gameCanvas.nativeElement.width)
+  }
+
+  private canvasClampY(input: number) {
+    return clamp(input, 0, this.gameCanvas.nativeElement.height)
+  }
+
   public ngAfterViewInit(): void {
     this.context = this.gameCanvas.nativeElement.getContext("2d")
     this.contextBoundRight = this.gameCanvas.nativeElement.getBoundingClientRect().right
@@ -123,21 +131,10 @@ export class AppComponent implements OnInit, AfterViewInit {
     if(this.grabbedEntity == null) {
       return
     }
-    const x = event.clientX - this.contextBoundLeft
-    const y = event.clientY - this.contextBoundTop
-    let redraw: boolean = false
-    if(event.clientX >= this.contextBoundLeft && event.clientX <= this.contextBoundRight) {
-      let newPosition = event.clientX - this.contextBoundLeft - this.grabbedOffsetX
-      this.grabbedEntity.x_pos = clamp(newPosition, 0, this.gameCanvas.nativeElement.width)
-      redraw = true
-    }
-    if(event.clientY >= this.contextBoundTop && event.clientY <= this.contextBoundBottom) {
-      let newPosition = event.clientY - this.contextBoundTop - this.grabbedOffsetY
-      this.grabbedEntity.y_pos = clamp(newPosition, 0, this.gameCanvas.nativeElement.height)
-      redraw = true
-    }
-    if(redraw) {
-      this.collection.draw(this.context)
-    }
+
+    this.grabbedEntity.x_pos = this.canvasClampX(event.clientX - this.contextBoundLeft - this.grabbedOffsetX)
+    this.grabbedEntity.y_pos = this.canvasClampY(event.clientY - this.contextBoundTop - this.grabbedOffsetY)
+
+    this.collection.draw(this.context)
   }
 }
