@@ -14,3 +14,10 @@ export interface GameState {
 export enum ElementName {
   fire, water, earth, electricity, nether
 }
+
+export interface Move {
+  player: String;
+  attack1: ElementName;
+  attack2: ElementName;
+  defend: ElementName;
+}

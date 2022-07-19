@@ -4,7 +4,7 @@ import { io, Socket } from 'socket.io-client'
 import { elements, initElements } from './display/elements'
 import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/display'
 import { clamp } from './utility'
-import { GameState } from '../../../shared/shared'
+import { ElementName, GameState, Move } from '../../../shared/shared'
 
 @Component({
   selector: 'app-root',
@@ -88,9 +88,16 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
     console.log(this.cards)
   }
+  
 
-  public playCards(player: string, attack1: string, attack2: string, defend: string){
-    this.socket.emit("playCards", player, attack1, attack2, defend);
+  public playCards(player: string, attack1: ElementName, attack2: ElementName, defend: ElementName){
+    var move: Move = {
+      player: player,
+      attack1: attack1,
+      attack2: attack2,
+      defend: defend
+    }
+    this.socket.emit("playCards", move);
   }
 
   @HostListener('window:keydown', ['$event'])
