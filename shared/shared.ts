@@ -12,5 +12,5 @@ export interface GameState {
 }
 
 export enum ElementName {
-  fire, water, earth, lightning, ether
+  fire, water, earth, electricity, nether
 }

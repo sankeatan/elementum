@@ -40,28 +40,28 @@ Socketio.on("connection", socket => {
     })
 })
 
-Socketio.on("playCards", (player: Player, attack1: ElementName, attack2: ElementName, defend: ElementName) => {
+Socketio.on("playCards", (player: string, attack1: ElementName, attack2: ElementName, defend: ElementName) => {
     if(player == 'player1'){
         switch(defend){
-            case 'fire': game.player1.fire = !game.player1.fire; break
-            case 'water': game.player1.water = !game.player1.water; break
-            case 'earth': game.player1.earth = !game.player1.earth; break
-            case 'electricity': game.player1.electricity = !game.player1.electricity; break
-            case 'nether': game.player1.nether = !game.player1.nether; break
+            case ElementName.fire: game.player1.fire = !game.player1.fire; break
+            case ElementName.water: game.player1.water = !game.player1.water; break
+            case ElementName.earth: game.player1.earth = !game.player1.earth; break
+            case ElementName.electricity: game.player1.electricity = !game.player1.electricity; break
+            case ElementName.nether: game.player1.nether = !game.player1.nether; break
         }
         switch(attack1){
-            case 'fire': game.player2.fire = !game.player2.fire; break
-            case 'water': game.player2.water = !game.player2.water; break
-            case 'earth': game.player2.earth = !game.player2.earth; break
-            case 'electricity': game.player2.electricity = !game.player2.electricity; break
-            case 'nether': game.player2.nether = !game.player2.nether; break
+            case ElementName.fire: game.player2.fire = !game.player2.fire; break
+            case ElementName.water: game.player2.water = !game.player2.water; break
+            case ElementName.earth: game.player2.earth = !game.player2.earth; break
+            case ElementName.electricity: game.player2.electricity = !game.player2.electricity; break
+            case ElementName.nether: game.player2.nether = !game.player2.nether; break
         }
         switch(attack2){
-            case 'fire': game.player2.fire = !game.player2.fire; break
-            case 'water': game.player2.water = !game.player2.water; break
-            case 'earth': game.player2.earth = !game.player2.earth; break
-            case 'electricity': game.player2.electricity = !game.player2.electricity; break
-            case 'nether': game.player2.nether = !game.player2.nether; break
+            case ElementName.fire: game.player2.fire = !game.player2.fire; break
+            case ElementName.water: game.player2.water = !game.player2.water; break
+            case ElementName.earth: game.player2.earth = !game.player2.earth; break
+            case ElementName.electricity: game.player2.electricity = !game.player2.electricity; break
+            case ElementName.nether: game.player2.nether = !game.player2.nether; break
         }
     } else {
         switch(defend){
