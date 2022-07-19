@@ -10,3 +10,7 @@ export interface GameState {
   player1: Player;
   player2: Player;
 }
+
+export enum ElementName {
+  fire, water, earth, lightning, ether
+}

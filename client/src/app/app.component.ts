@@ -4,7 +4,7 @@ import { io, Socket } from 'socket.io-client'
 import { elements, initElements } from './display/elements'
 import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/display'
 import { clamp } from './utility'
-import { game } from '../../../shared/gameState'
+import { GameState } from '../../../shared/shared'
 
 @Component({
   selector: 'app-root',
