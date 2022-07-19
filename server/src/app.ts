@@ -1,4 +1,4 @@
-import { game } from '../shared/gameState';
+import { Player, GameState, ElementName } from '../../shared/shared'
 
 const Express = require("express")()
 const Http = require("http").Server(Express)
@@ -8,6 +8,23 @@ var position = {
     x: 200,
     y: 200
 }
+
+var game: GameState = {
+    player1: {
+      fire: false,
+      water: false,
+      earth: false,
+      electricity: false,
+      nether: false,
+    },
+    player2: {
+      fire: false,
+      water: false,
+      earth: false,
+      electricity: false,
+      nether: false,
+    }
+  }
 
 Socketio.on("connection", socket => {
     socket.emit("position", position)
@@ -23,7 +40,7 @@ Socketio.on("connection", socket => {
     })
 })
 
-Socketio.on("playCards", (player, attack1, attack2, defend) => {
+Socketio.on("playCards", (player: Player, attack1: ElementName, attack2: ElementName, defend: ElementName) => {
     if(player == 'player1'){
         switch(defend){
             case 'fire': game.player1.fire = !game.player1.fire; break
@@ -68,7 +85,6 @@ Socketio.on("playCards", (player, attack1, attack2, defend) => {
             case 'electricity': game.player1.electricity = !game.player1.electricity; break
             case 'nether': game.player1.nether = !game.player1.nether; break
         }
-
     }
 })
 
