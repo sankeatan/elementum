@@ -1,4 +1,4 @@
-import { game } from '../shared/gameState';
+import { GameState } from '../shared/gameState';
 
 const Express = require("express")()
 const Http = require("http").Server(Express)
@@ -8,6 +8,23 @@ var position = {
     x: 200,
     y: 200
 }
+
+var game = {
+    player1: {
+      fire: false,
+      water: false,
+      earth: false,
+      electricity: false,
+      nether: false,
+    },
+    player2: {
+      fire: false,
+      water: false,
+      earth: false,
+      electricity: false,
+      nether: false,
+    }
+  }
 
 Socketio.on("connection", socket => {
     socket.emit("position", position)
