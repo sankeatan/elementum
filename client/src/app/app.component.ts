@@ -70,12 +70,18 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-  public ngAfterViewInit(): void {
-    this.context = this.gameCanvas.nativeElement.getContext("2d")
+
+  @HostListener('window:resize', ['$event'])
+  private updateContextBounds() {
     this.contextBoundRight = this.gameCanvas.nativeElement.getBoundingClientRect().right
     this.contextBoundLeft = this.gameCanvas.nativeElement.getBoundingClientRect().left
     this.contextBoundTop = this.gameCanvas.nativeElement.getBoundingClientRect().top
     this.contextBoundBottom = this.gameCanvas.nativeElement.getBoundingClientRect().bottom
+  }
+
+  public ngAfterViewInit(): void {
+    this.context = this.gameCanvas.nativeElement.getContext("2d")
+    this.updateContextBounds()
     this.socket.on("gameUpdate", (update) =>{
       console.log(update);
     })
@@ -87,9 +93,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.collection.draw(this.context)
   }
 
-  private getCursorPosition(event: MouseEvent) {
-    const x = event.clientX - this.contextBoundLeft
-    const y = event.clientY - this.contextBoundTop
+  private getCursorPosition(event: MouseEvent | TouchEvent) {
+    const x = (event instanceof MouseEvent ? event.clientX : event.touches[0].clientX) - this.contextBoundLeft
+    const y = (event instanceof MouseEvent ? event.clientY : event.touches[0].clientY) - this.contextBoundTop
     return {x: x, y: y}
   }
 
@@ -133,30 +139,42 @@ export class AppComponent implements OnInit, AfterViewInit {
     console.log(event)
   }
 
+  @HostListener('touchstart', ['$event'])
   @HostListener('window:mousedown', ['$event'])
-  mouseDown(event: MouseEvent) {
-    let mousePosition = this.getCursorPosition(event)
-    this.grabbedEntity = this.collection.getClicked(mousePosition.x, mousePosition.y, true)
+  mouseDown(event: MouseEvent | TouchEvent) {
+    let cursorPosition = this.getCursorPosition(event)
+
+    if(cursorPosition.x != this.canvasClampX(cursorPosition.x)
+    || cursorPosition.y != this.canvasClampY(cursorPosition.y)) {
+        return
+    }
+
+    this.grabbedEntity = this.collection.getClicked(cursorPosition.x, cursorPosition.y, true)
+
     if(this.grabbedEntity) {
-      this.grabbedOffsetX = mousePosition.x - this.grabbedEntity.x_pos
-      this.grabbedOffsetY = mousePosition.y - this.grabbedEntity.y_pos
+      this.grabbedOffsetX = cursorPosition.x - this.grabbedEntity.x_pos
+      this.grabbedOffsetY = cursorPosition.y - this.grabbedEntity.y_pos
       this.grabbedEntity.draw(this.context)
     }
   }
 
+  @HostListener('touchend', ['$event'])
+  @HostListener('touchcancel', ['$event'])
   @HostListener('window:mouseup', ['$event'])
-  mouseUp(event: MouseEvent) {
+  mouseUp(event: MouseEvent | TouchEvent) {
     this.grabbedEntity = null
   }
 
+  @HostListener('touchmove', ['$event'])
   @HostListener('window:mousemove', ['$event'])
-  mouseMove(event: MouseEvent): void {
+  mouseMove(event: MouseEvent | TouchEvent): void {
     if(this.grabbedEntity == null) {
       return
     }
 
-    this.grabbedEntity.x_pos = this.canvasClampX(event.clientX - this.contextBoundLeft - this.grabbedOffsetX)
-    this.grabbedEntity.y_pos = this.canvasClampY(event.clientY - this.contextBoundTop - this.grabbedOffsetY)
+    let cursorPosition = this.getCursorPosition(event)
+    this.grabbedEntity.x_pos = this.canvasClampX(cursorPosition.x - this.grabbedOffsetX)
+    this.grabbedEntity.y_pos = this.canvasClampY(cursorPosition.y - this.grabbedOffsetY)
 
     this.collection.draw(this.context)
   }
