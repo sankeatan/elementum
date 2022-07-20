@@ -62,7 +62,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         break
 
       case 'Prod':
-        this.socket = io("https://hogbod.dev:3000", config.IoConnectionOptions)
+        this.socket = io("https://hogbod.dev:3000/elementum.io", config.IoConnectionOptions)
         break
 
       default:
