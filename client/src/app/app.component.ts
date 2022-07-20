@@ -56,8 +56,8 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.contextBoundLeft = this.gameCanvas.nativeElement.getBoundingClientRect().left
     this.contextBoundTop = this.gameCanvas.nativeElement.getBoundingClientRect().top
     this.contextBoundBottom = this.gameCanvas.nativeElement.getBoundingClientRect().bottom
-    this.socket.on("position", (position: { x: number; y: number }): void => {
-      console.log(position)
+    this.socket.on("gameUpdate", (update) =>{
+      console.log(update);
     })
 
     // drawBoard(this.gameCanvas)

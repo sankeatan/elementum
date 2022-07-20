@@ -36,10 +36,14 @@ export abstract class CanvasEntity {
     x_pos: number = 0
     y_pos: number = 0
     rotation: number = 0
+    alternateColor?: string;
+    toggle: boolean;
     style: {} = {
         fillStyle: 'beige',//'#f1f',
         strokeStyle: '#000',
-        lineWidth: 6
+        lineWidth: 6,
+        alternateColor: 'beige',
+        toggle: false
     }
     constructor(x_pos: number, y_pos: number, options?: object) {
         this.x_pos = x_pos
@@ -58,6 +62,11 @@ export abstract class CanvasEntity {
     applyStyle(ctx: CanvasRenderingContext2D): void {
         for(const property in this.style) {
             ctx[property] = this.style[property]
+        }
+        if(this.toggle){
+            ctx.fillStyle=this.alternateColor;
+        } else {
+            ctx.fillStyle=ctx.fillStyle;
         }
     }
 
@@ -113,6 +122,8 @@ export class CircleCanvasEntity extends CanvasEntity {
         ctx.stroke()
         ctx.fill()
     }
+
+
 }
 
 export class PolygonCanvasEntity extends CanvasEntity {

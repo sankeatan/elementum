@@ -23,7 +23,7 @@ var game: GameState = {
 }
 
 function toggleElement(player: PlayerName, element: ElementName): void {
-    game[player][element] = !game[player][element]
+    game[player][element] = !game[player][element];
 }
 
 Socketio.on("connection", (socket: Socket) => {
@@ -36,6 +36,7 @@ Socketio.on("connection", (socket: Socket) => {
         toggleElement(data.player, data.move.defend)
 
         console.log(game)
+        socket.emit("gameUpdate", game);
     })
 })
 
