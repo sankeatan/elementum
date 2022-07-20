@@ -6,6 +6,11 @@ import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCan
 import { clamp } from './utility'
 import { GameState, PlayerMove, elementNames, ElementName, slotNames, SlotName, PlayerName } from '../../../shared/shared'
 
+const config = {
+  Environment: 'Local',
+  IoConnectionOptions: { transports: ['websocket', 'polling', 'flashsocket'] }
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -22,7 +27,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   private contextBoundTop: number = 0
   private contextBoundBottom: number = 0
 
-  private socket: Socket
+  private socket: Socket = null
 
   private collection: CanvasEntityCollection = new CanvasEntityCollection()
 
@@ -47,7 +52,22 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   public ngOnInit(): void {
-    this.socket = io("http://localhost:3000", { transports: ['websocket', 'polling', 'flashsocket'] })
+    switch(config.Environment) {
+      case 'Local':
+        this.socket = io("http://localhost:3000", config.IoConnectionOptions)
+        break
+
+      case 'Dev':
+        console.error("Development server does not exist")
+        break
+
+      case 'Prod':
+        this.socket = io("https://hogbod.dev:3000", config.IoConnectionOptions)
+        break
+
+      default:
+        console.error(`Invalid environment name: ${config.Environment}`)
+    }
   }
 
   public ngAfterViewInit(): void {
