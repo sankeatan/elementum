@@ -4,7 +4,7 @@ import { io, Socket } from 'socket.io-client'
 import { elements, initElements } from './display/elements'
 import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/display'
 import { clamp } from './utility'
-import { ElementName, GameState, Move } from '../../../shared/shared'
+import { GameState, PlayerMove, elementNames, ElementName, slotNames, SlotName, PlayerName } from '../../../shared/shared'
 
 @Component({
   selector: 'app-root',
@@ -29,6 +29,22 @@ export class AppComponent implements OnInit, AfterViewInit {
   private grabbedEntity: CanvasEntity = null
   private grabbedOffsetX: number = 0
   private grabbedOffsetY: number = 0
+
+  public readonly player: PlayerName = ['player1', 'player2'][Math.random() < 0.5 ? 0 : 1] as PlayerName // stupid thing that we'll obviously replace
+  public readonly slotNames: SlotName[] = slotNames
+  private playerSlots: PlayerMove = {'attack1': null, 'attack2': null, 'defend': null}
+
+  public hand(): ElementName[] {
+    // console.log(this.playerSlots)
+    return elementNames.filter(el => !(Object.values(this.playerSlots).includes(el as ElementName)))
+  }
+
+  public handPlusSlot(slot: string) {
+    let hand = this.hand()
+    let slotElement = this.playerSlots[slot]
+    if(slotElement) hand.push(slotElement)
+    return hand
+  }
 
   public ngOnInit(): void {
     this.socket = io("http://localhost:3000", { transports: ['websocket', 'polling', 'flashsocket'] })
@@ -65,39 +81,29 @@ export class AppComponent implements OnInit, AfterViewInit {
     return clamp(input, 0, this.gameCanvas.nativeElement.height)
   }
 
-  public slots = ['attack1', 'attack2', 'defend']
-
-  public cards = {
-    "fire": {"slot": "hand"},
-    "water": {"slot": "hand"},
-    "lightning": {"slot": "hand"},
-    "earth": {"slot": "hand"},
-    "nether": {"slot": "hand"}
-  }
-
-  public placeCard(slot: string, name: string) {
-    for(let card in this.cards) {
-      if(this.cards[card].slot == slot) {
-        this.cards[card].slot = 'hand'
-        break
-      }
+  public placeCard(slot: string, element: string) {
+    if(!(elementNames.includes(element as ElementName))) {
+      console.error(`Bad element name: ${element}`)
+      return
     }
 
-    if(name != 'none') {
-      this.cards[name].slot = slot;
+    if(!(this.hand().includes(element as ElementName))) {
+      console.error(`Tried to place element not in hand: ${element}`)
+      return
     }
-    console.log(this.cards)
+
+    this.playerSlots[slot] = element
   }
   
 
-  public playCards(player: string, attack1: ElementName, attack2: ElementName, defend: ElementName){
-    var move: Move = {
-      player: player,
-      attack1: attack1,
-      attack2: attack2,
-      defend: defend
+  public playCards() {
+    let move: PlayerMove = {
+      attack1: this.playerSlots.attack1,
+      attack2: this.playerSlots.attack2,
+      defend: this.playerSlots.defend
     }
-    this.socket.emit("playCards", move);
+
+    this.socket.emit("playCards", {'player': this.player, 'move': move});
   }
 
   @HostListener('window:keydown', ['$event'])
