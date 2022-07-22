@@ -7,8 +7,15 @@ import { clamp } from './utility'
 import { GameState, PlayerMove, elementNames, ElementName, slotNames, SlotName, PlayerName } from '../../../shared/shared'
 
 const config = {
-  Environment: 'Local',
-  IoConnectionOptions: { transports: ['websocket', 'polling', 'flashsocket'] }
+  Environment: 'Prod',
+  IoConnectionOptions: {
+    reconnectionDelay: 100,
+    reconnection: true,
+    reconnectionAttemps: 2000,
+    transports: ['websocket'],
+    agent: false,
+    upgrade: false,
+    rejectUnauthorized: false  }
 }
 
 @Component({
@@ -27,7 +34,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   private contextBoundTop: number = 0
   private contextBoundBottom: number = 0
 
-  private socket: Socket = null
+  private socket: Socket
 
   private collection: CanvasEntityCollection = new CanvasEntityCollection()
 
@@ -62,12 +69,20 @@ export class AppComponent implements OnInit, AfterViewInit {
         break
 
       case 'Prod':
-        this.socket = io("https://hogbod.dev:3000/elementum.io", config.IoConnectionOptions)
+        this.socket = io("https://hogbod.dev", config.IoConnectionOptions)
         break
 
       default:
         console.error(`Invalid environment name: ${config.Environment}`)
     }
+
+    this.socket.on("connect_error", (err) => {
+      console.log(err)
+    });
+
+    window.addEventListener('beforeunload', () => {
+      this.socket.close()
+    });
   }
 
 
