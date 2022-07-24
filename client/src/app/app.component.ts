@@ -183,6 +183,9 @@ export class AppComponent implements OnInit, AfterViewInit {
   @HostListener('touchmove', ['$event'])
   @HostListener('window:mousemove', ['$event'])
   mouseMove(event: MouseEvent | TouchEvent): void {
+    event.preventDefault()
+    console.log("test")
+
     if(this.grabbedEntity == null) {
       return
     }
