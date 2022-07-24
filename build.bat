@@ -1,5 +1,5 @@
 echo Starting build...
-if not exist build_tmp rmdir build_tmp /s /q
+if exist build_tmp rmdir build_tmp /s /q
 echo Building client...
 cd client
 call ng build --output-path=../build_tmp/client
