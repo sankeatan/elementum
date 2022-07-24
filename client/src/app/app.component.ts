@@ -2,12 +2,13 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, HostListener }
 import { DefaultEventsMap } from '@socket.io/component-emitter'
 import { io, Socket } from 'socket.io-client'
 import { elements, initElements } from './display/elements'
+import { initCards } from './display/cards'
 import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/display'
 import { clamp } from './utility'
 import { GameState, PlayerMove, elementNames, ElementName, slotNames, SlotName, PlayerName } from '../../../shared/shared'
 
 const config = {
-  Environment: 'Prod',
+  Environment: 'Local',
   IoConnectionOptions: {
     reconnectionDelay: 100,
     reconnection: true,
@@ -36,7 +37,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   private socket: Socket
 
-  private collection: CanvasEntityCollection = new CanvasEntityCollection()
+  private elementCollection: CanvasEntityCollection = new CanvasEntityCollection()
+  private cardCollection: CanvasEntityCollection = new CanvasEntityCollection()
 
   private grabbedEntity: CanvasEntity = null
   private grabbedOffsetX: number = 0
@@ -101,11 +103,10 @@ export class AppComponent implements OnInit, AfterViewInit {
       console.log(update);
     })
 
-    // drawBoard(this.gameCanvas)
-    initElements(this.collection)
-    this.collection.add(new RectangleCanvasEntity(60, 110, 100, 200))
-    this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
-    this.collection.draw(this.context)
+
+    initElements(this.elementCollection)
+    initCards(this.cardCollection)
+    this.reDraw();
   }
 
   private getCursorPosition(event: MouseEvent | TouchEvent) {
@@ -164,7 +165,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         return
     }
 
-    this.grabbedEntity = this.collection.getClicked(cursorPosition.x, cursorPosition.y, true)
+    this.grabbedEntity = this.cardCollection.getClicked(cursorPosition.x, cursorPosition.y, true)
 
     if(this.grabbedEntity) {
       this.grabbedOffsetX = cursorPosition.x - this.grabbedEntity.x_pos
@@ -191,6 +192,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.grabbedEntity.x_pos = this.canvasClampX(cursorPosition.x - this.grabbedOffsetX)
     this.grabbedEntity.y_pos = this.canvasClampY(cursorPosition.y - this.grabbedOffsetY)
 
-    this.collection.draw(this.context)
+    this.reDraw();
+  }
+
+  reDraw(){
+    this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
+    this.elementCollection.draw(this.context);
+    this.cardCollection.draw(this.context);
   }
 }
