@@ -45,9 +45,10 @@ export const elements: Element[] = [
 export function initElements(display: CanvasEntityCollection) {
   for(let i=0; i<elements.length; i++) {
     let element = elements[i]
+    //todo: get x and y from canvas
     let x = 640/2+150*Math.cos(-Math.PI/2 + i*2*Math.PI/elements.length)
     let y = 480/2+150*Math.sin(-Math.PI/2 + i*2*Math.PI/elements.length)
-    display.add(new CircleCanvasEntity(x, y, 150, {style: elements[i]}))
+    display.add(new CircleCanvasEntity(x, y, 75, {style: elements[i]}))
     console.log(`${x}, ${y}`)
     console.log(i)
   }

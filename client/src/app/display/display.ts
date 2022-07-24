@@ -4,7 +4,7 @@ export class CanvasEntityCollection {
     public scale: number = 1.0
 
     draw(ctx: CanvasRenderingContext2D): void {
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
         this.displayObjects.forEach(element => {
             element.draw(ctx)
@@ -100,6 +100,7 @@ export class RectangleCanvasEntity extends CanvasEntity {
         ctx.closePath()
         ctx.stroke()
         ctx.fill()
+        console.log(this.x_pos)
     }
 }
 
@@ -165,6 +166,13 @@ export class PolygonCanvasEntity extends CanvasEntity {
     }
 }
 
-// class CanvasEntityImage implements CanvasEntity {
-//     path: string
+// export class CanvasEntityImage implements CanvasEntity {
+//     private path: string
+//     private vertices: [x: number, y: number][]
+
+//     constructor(x_pos: number, y_pos: number, path: string, vertices: [number, number][], options?: {}) {
+//         vertices.forEach(vertex => {
+//             this.vertices.push([vertex[0], vertex[1]])
+//         })
+//     }
 // }
