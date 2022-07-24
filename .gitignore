@@ -8,3 +8,4 @@ server/package.json
 server/package-lock.json
 build
 build_tmp
+WinSCP.log
