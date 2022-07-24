@@ -205,11 +205,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   updateElements(){
     this.elementCollection.displayObjects.forEach(elem => {
       elem.toggle = this.boardState[elem["board"]][elem["name"]];
-      console.log(elem.toggle)
     })
     this.reDraw();
-    this.elementCollection.displayObjects.forEach(elem => {
-      console.log(elem.toggle)
-    })
   }
 }

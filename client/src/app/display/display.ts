@@ -36,13 +36,12 @@ export abstract class CanvasEntity {
     x_pos: number = 0
     y_pos: number = 0
     rotation: number = 0
-    alternateColor?: string;
+    alternateColor?: string = '#111';
     toggle: boolean = false;
     style: {} = {
         fillStyle: 'beige',//'#f1f',
         strokeStyle: '#000',
-        lineWidth: 6,
-        alternateColor: '#000',
+        lineWidth: 6
     }
     constructor(x_pos: number, y_pos: number, options?: object) {
         this.x_pos = x_pos
@@ -56,15 +55,18 @@ export abstract class CanvasEntity {
             }
             else this[option] = options[option]
         }
+
+        console.log(`${this["board"]}, ${this["name"]}`)
     }
 
     applyStyle(ctx: CanvasRenderingContext2D): void {
         for(const property in this.style) {
             ctx[property] = this.style[property]
         }
-        console.log(this.toggle);
+        console.log(`board: ${this["board"]}, name: ${this["name"]}, toggled? ${this.toggle}, toggled? ${ctx.fillStyle}`)
         if(this.toggle){
             ctx.fillStyle=this.alternateColor;
+            console.log(`Should be ${this.alternateColor}`)
         } else {
             ctx.fillStyle=ctx.fillStyle;
         }
@@ -99,7 +101,6 @@ export class RectangleCanvasEntity extends CanvasEntity {
         ctx.lineTo(this.x_pos-this.width/2, this.y_pos+this.height/2)
         ctx.closePath()
         ctx.stroke()
-        console.log(ctx.fillStyle)
         ctx.fill()
     }
 }
@@ -118,6 +119,7 @@ export class CircleCanvasEntity extends CanvasEntity {
 
     draw(ctx: CanvasRenderingContext2D): void {
         this.applyStyle(ctx)
+        console.log(ctx.fillStyle)
         ctx.beginPath()
         ctx.arc(this.x_pos, this.y_pos, this.radius, 0, 2*Math.PI)
         ctx.stroke()
