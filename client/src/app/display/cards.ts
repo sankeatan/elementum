@@ -41,7 +41,5 @@ export function initCards(display: CanvasEntityCollection) {
       let x = 300 + i*115
       let y = 600
       display.add(new RectangleCanvasEntity(x, y, 100, 200, {style: cards[i]}))
-      console.log(`${x}, ${y}`)
-      console.log(i)
     }
   }

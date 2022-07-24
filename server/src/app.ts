@@ -1,36 +1,24 @@
 import { Socket } from 'socket.io'
-import { Player, GameState, ElementName, PlayerMove, PlayerName } from '../../shared/shared'
+import { Board, BoardState, ElementName, PlayerMove, PlayerName, startBoard } from '../../shared/shared'
 
 const Express = require("express")()
 const Http = require("http").Server(Express)
 const Socketio = require("socket.io")(Http)
 
-var game: GameState = {
-    player1: {
-        fire: false,
-        water: false,
-        earth: false,
-        electricity: false,
-        nether: false,
-    },
-    player2: {
-        fire: false,
-        water: false,
-        earth: false,
-        electricity: false,
-        nether: false,
-    }
-}
+var game = startBoard();
 
-function toggleElement(player: PlayerName, element: ElementName): void {
-    game[player][element] = !game[player][element];
+function toggleElement(board: PlayerName, element: ElementName): void {
+    console.log(game);
+    console.log(board);
+    console.log(element);
+    game[board][element] = !game[board][element];
 }
 
 Socketio.on("connection", (socket: Socket) => {
     socket.on("playCards", (data: {player: PlayerName, move: PlayerMove}) => {
         console.log(data)
 
-        let enemy: PlayerName = data.player == 'player1' ? 'player2' : 'player1'
+        let enemy: PlayerName = data.player == 'board1' ? 'board2' : 'board1'
         toggleElement(enemy, data.move.attack1)
         toggleElement(enemy, data.move.attack2)
         toggleElement(data.player, data.move.defend)

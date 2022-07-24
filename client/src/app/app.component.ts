@@ -5,7 +5,7 @@ import { elements, initElements } from './display/elements'
 import { initCards } from './display/cards'
 import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/display'
 import { clamp } from './utility'
-import { GameState, PlayerMove, elementNames, ElementName, slotNames, SlotName, PlayerName } from '../../../shared/shared'
+import { BoardState, PlayerMove, elementNames, ElementName, slotNames, SlotName, PlayerName, startBoard } from '../../../shared/shared'
 
 const config = {
   Environment: 'Local',
@@ -40,11 +40,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   private elementCollection: CanvasEntityCollection = new CanvasEntityCollection()
   private cardCollection: CanvasEntityCollection = new CanvasEntityCollection()
 
+  private boardState: BoardState = startBoard()
+
   private grabbedEntity: CanvasEntity = null
   private grabbedOffsetX: number = 0
   private grabbedOffsetY: number = 0
 
-  public readonly player: PlayerName = ['player1', 'player2'][Math.random() < 0.5 ? 0 : 1] as PlayerName // stupid thing that we'll obviously replace
+  public readonly player: PlayerName = ['board1', 'board2'][Math.random() < 0.5 ? 0 : 1] as PlayerName // stupid thing that we'll obviously replace
   public readonly slotNames: SlotName[] = slotNames
   private playerSlots: PlayerMove = {'attack1': null, 'attack2': null, 'defend': null}
 
@@ -99,8 +101,9 @@ export class AppComponent implements OnInit, AfterViewInit {
   public ngAfterViewInit(): void {
     this.context = this.gameCanvas.nativeElement.getContext("2d")
     this.updateContextBounds()
-    this.socket.on("gameUpdate", (update) =>{
-      console.log(update);
+    this.socket.on("gameUpdate", (update) => {
+      this.boardState = update;
+      this.updateElements()
     })
 
 
@@ -150,9 +153,6 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   @HostListener('window:keydown', ['$event'])
   keyEvent(event: KeyboardEvent) {
-    console.log(event.code)
-    // event.preventDefault() // use this to prevent default behavior for keys used for the game
-    console.log(event)
   }
 
   @HostListener('touchstart', ['$event'])
@@ -185,7 +185,6 @@ export class AppComponent implements OnInit, AfterViewInit {
   @HostListener('window:mousemove', ['$event'])
   mouseMove(event: MouseEvent | TouchEvent): void {
     event.preventDefault()
-    console.log("test")
 
     if(this.grabbedEntity == null) {
       return
@@ -202,5 +201,15 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
     this.elementCollection.draw(this.context);
     this.cardCollection.draw(this.context);
+  }
+  updateElements(){
+    this.elementCollection.displayObjects.forEach(elem => {
+      elem.toggle = this.boardState[elem["board"]][elem["name"]];
+      console.log(elem.toggle)
+    })
+    this.reDraw();
+    this.elementCollection.displayObjects.forEach(elem => {
+      console.log(elem.toggle)
+    })
   }
 }

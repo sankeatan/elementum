@@ -1,5 +1,5 @@
 export class CanvasEntityCollection {
-    private displayObjects: CanvasEntity[] = []
+    public displayObjects: CanvasEntity[] = []
     // not used currently. may want to implement for scaling the collection for different canvas sizes
     public scale: number = 1.0
 
@@ -37,13 +37,12 @@ export abstract class CanvasEntity {
     y_pos: number = 0
     rotation: number = 0
     alternateColor?: string;
-    toggle: boolean;
+    toggle: boolean = false;
     style: {} = {
         fillStyle: 'beige',//'#f1f',
         strokeStyle: '#000',
         lineWidth: 6,
-        alternateColor: 'beige',
-        toggle: false
+        alternateColor: '#000',
     }
     constructor(x_pos: number, y_pos: number, options?: object) {
         this.x_pos = x_pos
@@ -63,6 +62,7 @@ export abstract class CanvasEntity {
         for(const property in this.style) {
             ctx[property] = this.style[property]
         }
+        console.log(this.toggle);
         if(this.toggle){
             ctx.fillStyle=this.alternateColor;
         } else {
@@ -99,8 +99,8 @@ export class RectangleCanvasEntity extends CanvasEntity {
         ctx.lineTo(this.x_pos-this.width/2, this.y_pos+this.height/2)
         ctx.closePath()
         ctx.stroke()
+        console.log(ctx.fillStyle)
         ctx.fill()
-        console.log(this.x_pos)
     }
 }
 

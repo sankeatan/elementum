@@ -5,7 +5,7 @@
         "target": "es6",
         "moduleResolution": "node",
         "sourceMap": true,
-        "outDir": "../build_tmp/server"
+        "outDir": "dist"
     },
     "lib": ["es2015"]
 }
