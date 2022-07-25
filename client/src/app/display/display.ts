@@ -1,10 +1,12 @@
+import { map } from "rxjs"
+
 export class CanvasEntityCollection {
     public displayObjects: CanvasEntity[] = []
     // not used currently. may want to implement for scaling the collection for different canvas sizes
     public scale: number = 1.0
 
     draw(ctx: CanvasRenderingContext2D): void {
-        //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
         this.displayObjects.forEach(element => {
             element.draw(ctx)
@@ -32,13 +34,12 @@ export class CanvasEntityCollection {
 }
 
 export abstract class CanvasEntity {
-    fixed: boolean = false
-    x_pos: number = 0
-    y_pos: number = 0
-    rotation: number = 0
-    alternateColor?: string = '#111';
-    toggle: boolean = false;
-    style: {} = {
+    public fixed: boolean = false
+    public x_pos: number = 0
+    public y_pos: number = 0
+    public alternateColor?: string = '#111'
+    public toggle: boolean = false
+    public style: {} = {
         fillStyle: 'beige',//'#f1f',
         strokeStyle: '#000',
         lineWidth: 6
@@ -48,27 +49,26 @@ export abstract class CanvasEntity {
         this.y_pos = y_pos
         for(const option in options) {
             // TODO: Might want to address runtime falibility of these dynamic options/suboptions
-            if(typeof options[option] == 'object') {
+            if(options[option] instanceof Object && Object.getPrototypeOf(options[option]) == Object.prototype) {
                 for(const suboption in options[option]) {
                     this[option][suboption] = options[option][suboption]
                 }
             }
-            else this[option] = options[option]
+            else {
+                this[option] = options[option]
+            }
         }
-
-        console.log(`${this["board"]}, ${this["name"]}`)
     }
 
     applyStyle(ctx: CanvasRenderingContext2D): void {
         for(const property in this.style) {
             ctx[property] = this.style[property]
         }
-        console.log(`board: ${this["board"]}, name: ${this["name"]}, toggled? ${this.toggle}, toggled? ${ctx.fillStyle}`)
+
         if(this.toggle){
-            ctx.fillStyle=this.alternateColor;
-            console.log(`Should be ${this.alternateColor}`)
+            ctx.fillStyle=this.alternateColor
         } else {
-            ctx.fillStyle=ctx.fillStyle;
+            ctx.fillStyle=ctx.fillStyle
         }
     }
 
@@ -77,8 +77,9 @@ export abstract class CanvasEntity {
 }
 
 export class RectangleCanvasEntity extends CanvasEntity {
-    width: number
-    height: number
+    public readonly width: number
+    public readonly height: number
+    // TODO: allow modification of width and height
 
     constructor(x_pos: number, y_pos: number, width: number, height: number, options?: {}) {
         super(x_pos, y_pos, options)
@@ -119,7 +120,6 @@ export class CircleCanvasEntity extends CanvasEntity {
 
     draw(ctx: CanvasRenderingContext2D): void {
         this.applyStyle(ctx)
-        console.log(ctx.fillStyle)
         ctx.beginPath()
         ctx.arc(this.x_pos, this.y_pos, this.radius, 0, 2*Math.PI)
         ctx.stroke()
@@ -130,7 +130,10 @@ export class CircleCanvasEntity extends CanvasEntity {
 }
 
 export class PolygonCanvasEntity extends CanvasEntity {
-    private vertices: [x: number, y: number][]
+    private vertices: [x: number, y: number][] = []
+    private rotation: {angle:number, anchor_x:number, anchor_y:number} = {angle:0 ,anchor_x:0 ,anchor_y:0}
+    private cached_rotations: any = {}
+    private rotation_anchor: {x:number, y:number} = {x:0, y:0}
 
     constructor(x_pos: number, y_pos: number, vertices: [number, number][], options?: {}) {
         super(x_pos, y_pos, options)
@@ -141,13 +144,14 @@ export class PolygonCanvasEntity extends CanvasEntity {
 
     // https://stackoverflow.com/questions/2212604/javascript-check-mouse-clicked-inside-the-circle-or-polygon/2212851#2212851
     isInside(x: number, y: number): boolean {
+        let verts = this.getRotatedVertices()
         x -= this.x_pos
         y -= this.y_pos
         let i: number, j: number, c: boolean = false
-        for( i = 0, j = this.vertices.length-1; i < this.vertices.length; j = i++ ) {
-            if( ( ( this.vertices[i][1] > y ) != ( this.vertices[j][1] > y ) ) &&
-                ( x < ( this.vertices[j][0] - this.vertices[i][0] ) * ( y - this.vertices[i][1] ) /
-                ( this.vertices[j][1] - this.vertices[i][1] ) + this.vertices[i][0] ) ) {
+        for(i = 0, j = verts.length-1; i < verts.length; j = i++ ) {
+            if( ( ( verts[i][1] > y ) != ( verts[j][1] > y ) ) &&
+                ( x < ( verts[j][0] - verts[i][0] ) * ( y - verts[i][1] ) /
+                ( verts[j][1] - verts[i][1] ) + verts[i][0] ) ) {
                     c = !c
             }
         }
@@ -155,16 +159,52 @@ export class PolygonCanvasEntity extends CanvasEntity {
     }
 
     draw(ctx: CanvasRenderingContext2D): void {
+        console.log(this.rotation[0])
+        let verts = this.getRotatedVertices()
+        console.log(this.rotation)
         this.applyStyle(ctx)
         ctx.beginPath()
-        ctx.moveTo(this.x_pos + this.vertices[0][0], this.y_pos + this.vertices[0][1])
-        for(let i=1; i<this.vertices.length; i++) {
-            ctx.lineTo(this.x_pos + this.vertices[i][0], this.y_pos + this.vertices[i][1])
+        // ctx.moveTo(this.x_pos + verts[0][0], this.y_pos + verts[0][1])
+        for(let i=0; i<verts.length; i++) {
+            ctx.lineTo(this.x_pos + verts[i][0], this.y_pos + verts[i][1])
         }
-        ctx.lineTo(this.x_pos, this.y_pos)
         ctx.closePath()
         ctx.stroke()
         ctx.fill()
+    }
+
+    rotate(rotation: {angle: number, anchor_x: number, anchor_y: number}) {
+        this.rotation.angle = Math.round(rotation.angle*100)/100
+        this.rotation.anchor_x = Math.round(rotation.anchor_x*10)/10
+        this.rotation.anchor_y = Math.round(rotation.anchor_y*10)/10
+    }
+
+    // https://stackoverflow.com/a/12161405/19585452
+    getRotatedVertices() {
+        if(this.rotation.angle == 0 && this.rotation.anchor_x == 0 && this.rotation.anchor_y == 0) {
+            return this.vertices
+        }
+
+        let angle = this.rotation.angle
+        let anchor_x =  this.rotation.anchor_x
+        let anchor_y = this.rotation.anchor_y
+        let rotation_key = [this.rotation.angle, this.rotation.anchor_x, this.rotation.anchor_y].toString()
+        let cached_rotation = this.cached_rotations[rotation_key]
+
+        if(cached_rotation) {
+            return cached_rotation
+        }
+        else {
+            let new_vertices: [x: number, y: number][] = []
+            this.vertices.forEach((vert: [x: number, y:number]) => {
+                let newX = anchor_x + (vert[0]-anchor_x)*Math.cos(angle) - (vert[1]-anchor_y)*Math.sin(angle)
+                let newY = anchor_y + (vert[0]-anchor_x)*Math.sin(angle) + (vert[1]-anchor_y)*Math.cos(angle)
+                new_vertices.push([newX, newY])
+            })
+            this.cached_rotations[[angle, anchor_x, anchor_y].toString()] = new_vertices
+            // TODO: cache multiple rotations?
+            return new_vertices
+        }
     }
 }
 

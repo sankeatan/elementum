@@ -5,26 +5,21 @@ const Express = require("express")()
 const Http = require("http").Server(Express)
 const Socketio = require("socket.io")(Http)
 
-var game = startBoard();
+var game = startBoard()
 
 function toggleElement(board: PlayerName, element: ElementName): void {
-    console.log(game);
-    console.log(board);
-    console.log(element);
-    game[board][element] = !game[board][element];
+    game[board][element] = !game[board][element]
 }
 
 Socketio.on("connection", (socket: Socket) => {
     socket.on("playCards", (data: {player: PlayerName, move: PlayerMove}) => {
-        console.log(data)
 
         let enemy: PlayerName = data.player == 'board1' ? 'board2' : 'board1'
         toggleElement(enemy, data.move.attack1)
         toggleElement(enemy, data.move.attack2)
         toggleElement(data.player, data.move.defend)
 
-        console.log(game)
-        socket.emit("gameUpdate", game);
+        socket.emit("gameUpdate", game)
     })
 })
 

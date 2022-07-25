@@ -46,12 +46,14 @@ export class AppComponent implements OnInit, AfterViewInit {
   private grabbedOffsetX: number = 0
   private grabbedOffsetY: number = 0
 
+  public static readonly canvasWidth: number = 600
+  public static readonly canvasHeight: number = 800
+
   public readonly player: PlayerName = ['board1', 'board2'][Math.random() < 0.5 ? 0 : 1] as PlayerName // stupid thing that we'll obviously replace
   public readonly slotNames: SlotName[] = slotNames
   private playerSlots: PlayerMove = {'attack1': null, 'attack2': null, 'defend': null}
 
   public hand(): ElementName[] {
-    // console.log(this.playerSlots)
     return elementNames.filter(el => !(Object.values(this.playerSlots).includes(el as ElementName)))
   }
 
@@ -81,12 +83,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     this.socket.on("connect_error", (err) => {
-      console.log(err)
-    });
+      console.error(err)
+    })
 
     window.addEventListener('beforeunload', () => {
       this.socket.close()
-    });
+    })
   }
 
 
@@ -100,16 +102,18 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   public ngAfterViewInit(): void {
     this.context = this.gameCanvas.nativeElement.getContext("2d")
+    this.context.canvas.width = AppComponent.canvasWidth
+    this.context.canvas.height = AppComponent.canvasHeight
     this.updateContextBounds()
     this.socket.on("gameUpdate", (update) => {
-      this.boardState = update;
+      this.boardState = update
       this.updateElements()
     })
 
 
     initElements(this.elementCollection)
     initCards(this.cardCollection)
-    this.reDraw();
+    this.reDraw()
   }
 
   private getCursorPosition(event: MouseEvent | TouchEvent) {
@@ -148,7 +152,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       defend: this.playerSlots.defend
     }
 
-    this.socket.emit("playCards", {'player': this.player, 'move': move});
+    this.socket.emit("playCards", {'player': this.player, 'move': move})
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -160,6 +164,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   mouseDown(event: MouseEvent | TouchEvent) {
     let cursorPosition = this.getCursorPosition(event)
 
+    console.log(`${cursorPosition.y} vs ${this.canvasClampY(cursorPosition.y)}`)
     if(cursorPosition.x != this.canvasClampX(cursorPosition.x)
     || cursorPosition.y != this.canvasClampY(cursorPosition.y)) {
         return
@@ -194,18 +199,18 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.grabbedEntity.x_pos = this.canvasClampX(cursorPosition.x - this.grabbedOffsetX)
     this.grabbedEntity.y_pos = this.canvasClampY(cursorPosition.y - this.grabbedOffsetY)
 
-    this.reDraw();
+    this.reDraw()
   }
 
   reDraw(){
     this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
-    this.elementCollection.draw(this.context);
-    this.cardCollection.draw(this.context);
+    this.elementCollection.draw(this.context)
+    this.cardCollection.draw(this.context)
   }
   updateElements(){
     this.elementCollection.displayObjects.forEach(elem => {
-      elem.toggle = this.boardState[elem["board"]][elem["name"]];
+      elem.toggle = this.boardState[elem["board"]][elem["name"]]
     })
-    this.reDraw();
+    this.reDraw()
   }
 }

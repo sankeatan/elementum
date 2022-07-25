@@ -1,14 +1,14 @@
 export interface Board {
-    fire: Boolean;
-    water: Boolean;
-    earth: Boolean;
-    electricity: Boolean;
-    nether: Boolean;
+    fire: Boolean
+    water: Boolean
+    earth: Boolean
+    electricity: Boolean
+    nether: Boolean
 }
 
 export interface BoardState {
-  board1: Board;
-  board2: Board;
+  board1: Board
+  board2: Board
 }
 
 export function startBoard(): BoardState {
