@@ -8,7 +8,7 @@ import { clamp } from './utility'
 import { BoardState, PlayerMove, elementNames, ElementName, slotNames, SlotName, PlayerName, startBoard } from '../../../shared/shared'
 
 const config = {
-  Environment: 'Local',
+  Environment: 'Prod',
   IoConnectionOptions: {
     reconnectionDelay: 100,
     reconnection: true,
@@ -39,6 +39,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   private elementCollection: CanvasEntityCollection = new CanvasEntityCollection()
   private cardCollection: CanvasEntityCollection = new CanvasEntityCollection()
+  private cardSlotCollection: CanvasEntityCollection = new CanvasEntityCollection()
 
   private boardState: BoardState = startBoard()
 
@@ -112,7 +113,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
 
     initElements(this.elementCollection)
-    initCardSlots(this.elementCollection)
+    initCardSlots(this.cardSlotCollection)
     initCards(this.cardCollection)
     this.reDraw()
   }
