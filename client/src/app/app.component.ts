@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, HostListener }
 import { DefaultEventsMap } from '@socket.io/component-emitter'
 import { io, Socket } from 'socket.io-client'
 import { elements, initElements } from './display/elements'
-import { initCards } from './display/cards'
+import { initCards, initCardSlots } from './display/cards'
 import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/display'
 import { clamp } from './utility'
 import { BoardState, PlayerMove, elementNames, ElementName, slotNames, SlotName, PlayerName, startBoard } from '../../../shared/shared'
@@ -112,6 +112,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
 
     initElements(this.elementCollection)
+    initCardSlots(this.elementCollection)
     initCards(this.cardCollection)
     this.reDraw()
   }
