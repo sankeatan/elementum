@@ -207,6 +207,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   reDraw(){
     this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
     this.elementCollection.draw(this.context)
+    this.cardSlotCollection.draw(this.context)
     this.cardCollection.draw(this.context)
   }
   updateElements(){
