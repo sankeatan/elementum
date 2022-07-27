@@ -2,9 +2,9 @@ import { AppComponent } from '../app.component'
 import { RectangleCanvasEntity, CanvasEntityCollection, PolygonCanvasEntity } from './display'
 
 export interface Card {
-  strokeStyle: string
-  fillStyle: string
-  name: string
+  strokeStyle?: string
+  fillStyle?: string
+  name?: string
 }
 
 export const cards: Card[] = [
@@ -32,29 +32,28 @@ export const cards: Card[] = [
   strokeStyle: "black",
   fillStyle: "brown",
   name: "nether",
-},
+},{},{},{}
 ]
 
 export function initCards(collection: CanvasEntityCollection) {
-  for(let i=0; i<cards.length; i++) {
-    let card = cards[i]
-    // TODO: get x and y from canvas
+  for(const [i, card] of cards.entries()) {
     let xpad = 160
     let ypad = 15
     let x = xpad + (AppComponent.canvasWidth-2*xpad)*i/(cards.length-1)
-    let y = -40 + AppComponent.canvasHeight - ypad*(cards.length-1)/2 + Math.abs(i*ypad-((cards.length-1)*ypad)/2)
+    let y = Math.abs(i-cards.length/2+1) * 20 //AppComponent.canvasHeight + Math.pow(i-cards.length/2, 2) - 160
+    console.log(y)
     let height = 150
     let width = 100
-    let rot_increment = Math.PI/16
-    let rotation = {angle: i*rot_increment - (rot_increment*cards.length/2), anchor_x: 0, anchor_y: 0}
+    let rot_increment = (Math.PI/4)/(cards.length)
+    let rotation_angle = i*rot_increment - rot_increment*(cards.length-1)/2
     let entity = new PolygonCanvasEntity(x, y, [
       [-width/2,-height/2],
       [width/2,-height/2],
       [width/2, height/2],
       [-width/2, height/2]
-    ], {style: cards[i]
+    ], {style: card
     })
-    entity.rotate(rotation)
+    entity.rotate(rotation_angle)
     collection.add(entity)
   }
 }

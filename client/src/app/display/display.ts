@@ -6,8 +6,6 @@ export class CanvasEntityCollection {
     public scale: number = 1.0
 
     draw(ctx: CanvasRenderingContext2D): void {
-        //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-
         this.displayObjects.forEach(element => {
             element.draw(ctx)
         })
@@ -129,11 +127,12 @@ export class CircleCanvasEntity extends CanvasEntity {
 
 }
 
+export interface Rotation {angle: number, anchor_x?: number, anchor_y?: number}
+
 export class PolygonCanvasEntity extends CanvasEntity {
     private vertices: [x: number, y: number][] = []
-    private rotation: {angle:number, anchor_x:number, anchor_y:number} = {angle:0 ,anchor_x:0 ,anchor_y:0}
-    private cached_rotations: any = {}
-    private rotation_anchor: {x:number, y:number} = {x:0, y:0}
+    private rotation: Rotation = {angle:0 ,anchor_x:0 ,anchor_y:0}
+    private cached_rotations: {[key:string]: [x: number, y: number][]} = {}
 
     constructor(x_pos: number, y_pos: number, vertices: [number, number][], options?: {}) {
         super(x_pos, y_pos, options)
@@ -173,10 +172,13 @@ export class PolygonCanvasEntity extends CanvasEntity {
         ctx.fill()
     }
 
-    rotate(rotation: {angle: number, anchor_x: number, anchor_y: number}) {
-        this.rotation.angle = Math.round(rotation.angle*100)/100
-        this.rotation.anchor_x = Math.round(rotation.anchor_x*10)/10
-        this.rotation.anchor_y = Math.round(rotation.anchor_y*10)/10
+    rotate(rotation: Rotation | number): void {
+        let angle = (rotation as Rotation).angle || rotation as number
+        let anchor_x = (rotation as Rotation).anchor_x || 0
+        let anchor_y = (rotation as Rotation).anchor_y || 0
+        this.rotation.angle = Math.round(angle*100)/100
+        this.rotation.anchor_x = Math.round(anchor_x*10)/10
+        this.rotation.anchor_y = Math.round(anchor_y*10)/10
     }
 
     // https://stackoverflow.com/a/12161405/19585452
@@ -202,7 +204,6 @@ export class PolygonCanvasEntity extends CanvasEntity {
                 new_vertices.push([newX, newY])
             })
             this.cached_rotations[[angle, anchor_x, anchor_y].toString()] = new_vertices
-            // TODO: cache multiple rotations?
             return new_vertices
         }
     }

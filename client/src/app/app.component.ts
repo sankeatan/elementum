@@ -6,18 +6,7 @@ import { initCards, initCardSlots } from './display/cards'
 import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/display'
 import { clamp } from './utility'
 import { BoardState, PlayerMove, elementNames, ElementName, slotNames, SlotName, PlayerName, startBoard } from '../../../shared/shared'
-
-const config = {
-  Environment: 'Prod',
-  IoConnectionOptions: {
-    reconnectionDelay: 100,
-    reconnection: true,
-    reconnectionAttemps: 2000,
-    transports: ['websocket'],
-    agent: false,
-    upgrade: false,
-    rejectUnauthorized: false  }
-}
+import { environment } from 'src/environments/environment'
 
 @Component({
   selector: 'app-root',
@@ -66,22 +55,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   public ngOnInit(): void {
-    switch(config.Environment) {
-      case 'Local':
-        this.socket = io("http://localhost:3000", config.IoConnectionOptions)
-        break
-
-      case 'Dev':
-        console.error("Development server does not exist")
-        break
-
-      case 'Prod':
-        this.socket = io("https://hogbod.dev", config.IoConnectionOptions)
-        break
-
-      default:
-        console.error(`Invalid environment name: ${config.Environment}`)
-    }
+    this.socket = io(environment.serverURL, environment.IoConnectionOptions)
 
     this.socket.on("connect_error", (err) => {
       console.error(err)
