@@ -2,9 +2,9 @@ import { AppComponent } from '../app.component'
 import { RectangleCanvasEntity, CanvasEntityCollection, PolygonCanvasEntity } from './display'
 
 export interface Card {
-  strokeStyle: string
-  fillStyle: string
-  name: string
+  strokeStyle?: string
+  fillStyle?: string
+  name?: string
 }
 
 export const cards: Card[] = [
@@ -32,15 +32,15 @@ export const cards: Card[] = [
   strokeStyle: "black",
   fillStyle: "brown",
   name: "nether",
-}
+},{},{},{}
 ]
 
 export function initCards(collection: CanvasEntityCollection) {
   for(const [i, card] of cards.entries()) {
     let xpad = 160
     let ypad = 15
-    let x = xpad + (AppComponent.canvasWidth-2*xpad)*i/(cards.length-1)
-    let y = Math.abs(i-cards.length/2+1) * 20 //AppComponent.canvasHeight + Math.pow(i-cards.length/2, 2) - 160
+    let x = 400//xpad + (AppComponent.canvasWidth-2*xpad)*i/(cards.length-1)
+    let y = 400//Math.abs(i-cards.length/2+1) * 20 //AppComponent.canvasHeight + Math.pow(i-cards.length/2, 2) - 160
     console.log(y)
     let height = AppComponent.canvasHeight * .225
     let width = height * .7159
