@@ -1,17 +1,19 @@
-import { map } from "rxjs"
+
+// TODO: add ability to round the edges of polygons:
+// https://stackoverflow.com/a/3368118/19585452
 
 export class CanvasEntityCollection {
     public displayObjects: CanvasEntity[] = []
     // not used currently. may want to implement for scaling the collection for different canvas sizes
     public scale: number = 1.0
 
-    draw(ctx: CanvasRenderingContext2D): void {
+    public draw(ctx: CanvasRenderingContext2D): void {
         this.displayObjects.forEach(element => {
             element.draw(ctx)
         })
     }
 
-    getClicked(x: number, y: number, bringToFront: boolean = false): CanvasEntity {
+    public getClicked(x: number, y: number, bringToFront: boolean = false): CanvasEntity {
         for(let i=this.displayObjects.length-1; i>=0; i--) {
             let clicked_obj = this.displayObjects[i]
             if(clicked_obj.isInside(x, y)) {
@@ -26,7 +28,7 @@ export class CanvasEntityCollection {
         return null
     }
 
-    add(displayObject: CanvasEntity): void {
+    public add(displayObject: CanvasEntity): void {
         this.displayObjects.push(displayObject)
     }
 }
@@ -58,7 +60,7 @@ export abstract class CanvasEntity {
         }
     }
 
-    applyStyle(ctx: CanvasRenderingContext2D): void {
+    protected applyStyle(ctx: CanvasRenderingContext2D): void {
         for(const property in this.style) {
             ctx[property] = this.style[property]
         }
@@ -70,8 +72,8 @@ export abstract class CanvasEntity {
         }
     }
 
-    abstract isInside(x:number, y: number): boolean
-    abstract draw(ctx: CanvasRenderingContext2D): void
+    public abstract isInside(x:number, y: number): boolean
+    public abstract draw(ctx: CanvasRenderingContext2D): void
 }
 
 export class RectangleCanvasEntity extends CanvasEntity {
@@ -85,13 +87,13 @@ export class RectangleCanvasEntity extends CanvasEntity {
         this.height = height
     }
 
-    isInside(x: number, y: number): boolean {
+    public isInside(x: number, y: number): boolean {
         x -= this.x_pos
         y -= this.y_pos
         return x >= -this.width/2 && x <= this.width/2 && y >= -this.height/2 && y <= this.height/2
     }
 
-    draw(ctx: CanvasRenderingContext2D): void {
+    public draw(ctx: CanvasRenderingContext2D): void {
         this.applyStyle(ctx)
         ctx.beginPath()
         ctx.moveTo(this.x_pos-this.width/2, this.y_pos-this.height/2)
@@ -112,58 +114,51 @@ export class CircleCanvasEntity extends CanvasEntity {
         this.radius = radius
     }
 
-    isInside(x: number, y: number): boolean {
+    public isInside(x: number, y: number): boolean {
         return Math.pow((x-this.x_pos),2) + Math.pow((y-this.y_pos),2) <= Math.pow(this.radius,2)
     }
 
-    draw(ctx: CanvasRenderingContext2D): void {
+    public draw(ctx: CanvasRenderingContext2D): void {
         this.applyStyle(ctx)
         ctx.beginPath()
         ctx.arc(this.x_pos, this.y_pos, this.radius, 0, 2*Math.PI)
         ctx.stroke()
         ctx.fill()
     }
-
-
 }
-
-export interface Rotation {angle: number, anchor_x?: number, anchor_y?: number}
 
 export class PolygonCanvasEntity extends CanvasEntity {
     private vertices: [x: number, y: number][] = []
-    private rotation: Rotation = {angle:0 ,anchor_x:0 ,anchor_y:0}
-    private cached_rotations: {[key:string]: [x: number, y: number][]} = {}
+    private rotation: number = 0
+    private cached_rotations: {[key:number]: [x: number, y: number][]} = {}
 
     constructor(x_pos: number, y_pos: number, vertices: [number, number][], options?: {}) {
         super(x_pos, y_pos, options)
         vertices.forEach(vertex => {
-            this.vertices.push([vertex[0], vertex[1]])
-        })
+            this.vertices.push([vertex[0], vertex[1]])        })
     }
 
     // https://stackoverflow.com/questions/2212604/javascript-check-mouse-clicked-inside-the-circle-or-polygon/2212851#2212851
-    isInside(x: number, y: number): boolean {
+    public isInside(x: number, y: number): boolean {
         let verts = this.getRotatedVertices()
         x -= this.x_pos
         y -= this.y_pos
-        let i: number, j: number, c: boolean = false
-        for(i = 0, j = verts.length-1; i < verts.length; j = i++ ) {
+        let inside = false
+        for(let i = 0, j = verts.length-1; i < verts.length; j = i++ ) {
             if( ( ( verts[i][1] > y ) != ( verts[j][1] > y ) ) &&
                 ( x < ( verts[j][0] - verts[i][0] ) * ( y - verts[i][1] ) /
                 ( verts[j][1] - verts[i][1] ) + verts[i][0] ) ) {
-                    c = !c
+                    inside = !inside
             }
         }
-        return c
+        return inside
     }
 
-    draw(ctx: CanvasRenderingContext2D): void {
-        console.log(this.rotation[0])
+    public draw(ctx: CanvasRenderingContext2D): void {
         let verts = this.getRotatedVertices()
-        console.log(this.rotation)
         this.applyStyle(ctx)
         ctx.beginPath()
-        // ctx.moveTo(this.x_pos + verts[0][0], this.y_pos + verts[0][1])
+        // according to the docs, the first lineTo is treated as a moveTo
         for(let i=0; i<verts.length; i++) {
             ctx.lineTo(this.x_pos + verts[i][0], this.y_pos + verts[i][1])
         }
@@ -172,40 +167,35 @@ export class PolygonCanvasEntity extends CanvasEntity {
         ctx.fill()
     }
 
-    rotate(rotation: Rotation | number): void {
-        let angle = (rotation as Rotation).angle || rotation as number
-        let anchor_x = (rotation as Rotation).anchor_x || 0
-        let anchor_y = (rotation as Rotation).anchor_y || 0
-        this.rotation.angle = Math.round(angle*100)/100
-        this.rotation.anchor_x = Math.round(anchor_x*10)/10
-        this.rotation.anchor_y = Math.round(anchor_y*10)/10
+    public rotate(angle: number, anchor_offset_x: number = 0, anchor_offset_y: number = 0): void {
+        // the rotation angle is rounded to increase hits in rotation cache at the cost of some precision
+        this.rotation = Math.round(angle*100)/100
+        let dist_to_anchor = Math.sqrt(Math.pow(anchor_offset_x, 2) + Math.pow(anchor_offset_y, 2))
+        this.x_pos += dist_to_anchor * (Math.cos(this.rotation)-1)
+        this.y_pos += dist_to_anchor * Math.sin(this.rotation)
     }
 
     // https://stackoverflow.com/a/12161405/19585452
-    getRotatedVertices() {
-        if(this.rotation.angle == 0 && this.rotation.anchor_x == 0 && this.rotation.anchor_y == 0) {
+    private getRotatedVertices(): [x: number, y: number][] {
+        if(this.rotation == 0) {
             return this.vertices
         }
 
-        let angle = this.rotation.angle
-        let anchor_x =  this.rotation.anchor_x
-        let anchor_y = this.rotation.anchor_y
-        let rotation_key = [this.rotation.angle, this.rotation.anchor_x, this.rotation.anchor_y].toString()
-        let cached_rotation = this.cached_rotations[rotation_key]
-
+        let cached_rotation = this.cached_rotations[this.rotation]
         if(cached_rotation) {
             return cached_rotation
         }
-        else {
-            let new_vertices: [x: number, y: number][] = []
-            this.vertices.forEach((vert: [x: number, y:number]) => {
-                let newX = anchor_x + (vert[0]-anchor_x)*Math.cos(angle) - (vert[1]-anchor_y)*Math.sin(angle)
-                let newY = anchor_y + (vert[0]-anchor_x)*Math.sin(angle) + (vert[1]-anchor_y)*Math.cos(angle)
-                new_vertices.push([newX, newY])
-            })
-            this.cached_rotations[[angle, anchor_x, anchor_y].toString()] = new_vertices
-            return new_vertices
-        }
+
+        let new_vertices: [x: number, y: number][] = []
+        this.vertices.forEach((vert: [x: number, y: number]) => {
+            let newX = vert[0]*Math.cos(this.rotation) - vert[1]*Math.sin(this.rotation)
+            let newY = vert[0]*Math.sin(this.rotation) + vert[1]*Math.cos(this.rotation)
+            new_vertices.push([newX, newY])
+        })
+
+        this.cached_rotations[this.rotation] = new_vertices
+
+        return new_vertices
     }
 }
 

@@ -2,9 +2,9 @@ import { AppComponent } from '../app.component'
 import { RectangleCanvasEntity, CanvasEntityCollection, PolygonCanvasEntity } from './display'
 
 export interface Card {
-  strokeStyle?: string
-  fillStyle?: string
-  name?: string
+  strokeStyle: string
+  fillStyle: string
+  name: string
 }
 
 export const cards: Card[] = [
@@ -32,7 +32,7 @@ export const cards: Card[] = [
   strokeStyle: "black",
   fillStyle: "brown",
   name: "nether",
-},{},{},{}
+}
 ]
 
 export function initCards(collection: CanvasEntityCollection) {
@@ -42,17 +42,20 @@ export function initCards(collection: CanvasEntityCollection) {
     let x = xpad + (AppComponent.canvasWidth-2*xpad)*i/(cards.length-1)
     let y = Math.abs(i-cards.length/2+1) * 20 //AppComponent.canvasHeight + Math.pow(i-cards.length/2, 2) - 160
     console.log(y)
-    let height = 150
-    let width = 100
+    let height = AppComponent.canvasHeight * .225
+    let width = height * .7159
     let rot_increment = (Math.PI/4)/(cards.length)
     let rotation_angle = i*rot_increment - rot_increment*(cards.length-1)/2
+    // TODO: give rotation functionality to RectangleCanvasEntity and use that instead?
+    // another option: get rid of RectangleCanvasEntity and just add a rectangle constructor to PolygonCanvasEntity
     let entity = new PolygonCanvasEntity(x, y, [
-      [-width/2,-height/2],
-      [width/2,-height/2],
-      [width/2, height/2],
-      [-width/2, height/2]
-    ], {style: card
-    })
+        [-width/2,-height/2],
+        [width/2,-height/2],
+        [width/2, height/2],
+        [-width/2, height/2]
+      ],
+      {style: card}
+    )
     entity.rotate(rotation_angle)
     collection.add(entity)
   }

@@ -47,18 +47,22 @@ export const elements: any = [
 ]
 
 export function initElements(display: CanvasEntityCollection) {
-  for(let board of ["board1", "board2"]) {
-    let yOffset = board == "board1" ? 0 : 400
+  for(const params of [
+    {name: "board1", x: AppComponent.canvasWidth * 3/4, y: AppComponent.canvasHeight * 3/4, rotation: 0},
+    {name: "board2", x: AppComponent.canvasWidth * 3/4, y: AppComponent.canvasHeight * 1/4, rotation: Math.PI}
+  ]) {
+    let center_distance = AppComponent.canvasWidth * 1/8
+    let element_radius = AppComponent.canvasWidth * 1/19
     for(const [i, element] of elements.entries()) {
-      let x = AppComponent.canvasWidth/2+100*Math.cos(-Math.PI/2 + i*2*Math.PI/elements.length
-        + (board=='board1'?Math.PI:0))
+      let x = center_distance*Math.cos(-Math.PI/2 + i*2*Math.PI/elements.length
+        + params.rotation) + params.x
 
-      let y = AppComponent.canvasHeight/4+100*Math.sin(-Math.PI/2 + i*2*Math.PI/elements.length
-        + (board=='board1'?Math.PI:0)) + yOffset
+      let y = center_distance*Math.sin(-Math.PI/2 + i*2*Math.PI/elements.length
+        + params.rotation) + params.y
 
-      display.add(new CircleCanvasEntity(x, y, 50, {
+      display.add(new CircleCanvasEntity(x, y, element_radius, {
         style: element.style,
-        board: board,
+        board: params.name,
         name: element.name,
         alternateColor: element.alternateColor
       }))

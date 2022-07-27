@@ -36,8 +36,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   private grabbedOffsetX: number = 0
   private grabbedOffsetY: number = 0
 
-  public static readonly canvasWidth: number = 600
-  public static readonly canvasHeight: number = 800
+  public static readonly canvasWidth: number = 800
+  public static readonly canvasHeight: number = 600
 
   public readonly player: PlayerName = ['board1', 'board2'][Math.random() < 0.5 ? 0 : 1] as PlayerName // stupid thing that we'll obviously replace
   public readonly slotNames: SlotName[] = slotNames
