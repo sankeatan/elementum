@@ -93,26 +93,30 @@ export function initCards(collection: CanvasEntityCollection) {
 }
 
 export function initCardSlots(collection: CanvasEntityCollection) {
-  let card_height = 90
-  let card_width = 60
-  let gutter_width = 220
-  let vertical_separation = 30
+  let card_height = AppComponent.canvasHeight * .17
+  let card_width = card_height * .7159
+  let xstart = AppComponent.canvasWidth * .18
+  let xpad = AppComponent.canvasWidth * 0.03
+  let ypad = 60
   for(let i=0; i<3; i++) {
-    let x_pos = gutter_width + i*(AppComponent.canvasWidth-2*gutter_width)/2
+    let x_pos = xstart + (card_width + xpad) * i
     for(const offset_mult of [-1, 1]) {
-      let y_pos = (AppComponent.canvasHeight + offset_mult * (card_height + vertical_separation))/2
-      let entity = new RectangleCanvasEntity(x_pos, y_pos, card_width, card_height, {style: {fillStyle: "gray"}})
+      let y_pos = AppComponent.canvasHeight/2 + offset_mult * (card_height + ypad)/2
+      let entity = new RectangleCanvasEntity(x_pos, y_pos, card_width, card_height,
+        {style: {fillStyle: i==2?"blue":"red"}})
       collection.add(entity)
     }
   }
 
-  let x = new PolygonCanvasEntity(400, 150, [
-      // [-40/2,-300/2],
-      [40/2/2,-300/2],
-      [40/2, 300/2],
-      [-40/2, 300/2]
-    ]
-  )
-  x.rotate(Math.PI/6)
-  collection.add(x)
+  // let x = new PolygonCanvasEntity(400, 150, [
+  //     // [-40/2,-300/2],
+  //     [40/2/2,-300/2],
+  //     [40/2, 300/2],
+  //     [-40/2, 300/2]
+  //   ]
+  // )
+  // x.rotate(Math.PI/6)
+  // collection.add(x)
+
+  collection.add(new PolygonCanvasEntity(0, AppComponent.canvasHeight/2, [[0,0],[AppComponent.canvasWidth,0]]))
 }
