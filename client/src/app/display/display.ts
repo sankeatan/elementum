@@ -77,9 +77,9 @@ export abstract class CanvasEntity {
 }
 
 export class RectangleCanvasEntity extends CanvasEntity {
+    // TODO: allow modification of width and height
     public readonly width: number
     public readonly height: number
-    // TODO: allow modification of width and height
 
     constructor(x_pos: number, y_pos: number, width: number, height: number, options?: {}) {
         super(x_pos, y_pos, options)
@@ -107,7 +107,7 @@ export class RectangleCanvasEntity extends CanvasEntity {
 }
 
 export class CircleCanvasEntity extends CanvasEntity {
-    radius: number
+    public radius: number
 
     constructor(x_pos: number, y_pos: number, radius: number, options?: {}) {
         super(x_pos, y_pos, options)
@@ -135,7 +135,8 @@ export class PolygonCanvasEntity extends CanvasEntity {
     constructor(x_pos: number, y_pos: number, vertices: [number, number][], options?: {}) {
         super(x_pos, y_pos, options)
         vertices.forEach(vertex => {
-            this.vertices.push([vertex[0], vertex[1]])        })
+            this.vertices.push([vertex[0], vertex[1]])
+        })
     }
 
     // https://stackoverflow.com/questions/2212604/javascript-check-mouse-clicked-inside-the-circle-or-polygon/2212851#2212851
@@ -145,9 +146,9 @@ export class PolygonCanvasEntity extends CanvasEntity {
         y -= this.y_pos
         let inside = false
         for(let i = 0, j = verts.length-1; i < verts.length; j = i++ ) {
-            if( ( ( verts[i][1] > y ) != ( verts[j][1] > y ) ) &&
-                ( x < ( verts[j][0] - verts[i][0] ) * ( y - verts[i][1] ) /
-                ( verts[j][1] - verts[i][1] ) + verts[i][0] ) ) {
+            if( ((verts[i][1] > y) != (verts[j][1] > y)) &&
+                (x < (verts[j][0] - verts[i][0]) * (y - verts[i][1]) /
+                (verts[j][1] - verts[i][1]) + verts[i][0])) {
                     inside = !inside
             }
         }
@@ -158,21 +159,20 @@ export class PolygonCanvasEntity extends CanvasEntity {
         let verts = this.getRotatedVertices()
         this.applyStyle(ctx)
         ctx.beginPath()
+
         // according to the docs, the first lineTo is treated as a moveTo
-        for(let i=0; i<verts.length; i++) {
-            ctx.lineTo(this.x_pos + verts[i][0], this.y_pos + verts[i][1])
+        for(const vert of verts) {
+            ctx.lineTo(this.x_pos + vert[0], this.y_pos + vert[1])
         }
+
         ctx.closePath()
         ctx.stroke()
         ctx.fill()
     }
 
-    public rotate(angle: number, anchor_offset_x: number = 0, anchor_offset_y: number = 0): void {
+    public rotate(angle: number): void {
         // the rotation angle is rounded to increase hits in rotation cache at the cost of some precision
         this.rotation = Math.round(angle*100)/100
-        let dist_to_anchor = Math.sqrt(Math.pow(anchor_offset_x, 2) + Math.pow(anchor_offset_y, 2))
-        this.x_pos += dist_to_anchor * (Math.cos(this.rotation)-1)
-        this.y_pos += dist_to_anchor * Math.sin(this.rotation)
     }
 
     // https://stackoverflow.com/a/12161405/19585452
@@ -187,9 +187,10 @@ export class PolygonCanvasEntity extends CanvasEntity {
         }
 
         let new_vertices: [x: number, y: number][] = []
+
         this.vertices.forEach((vert: [x: number, y: number]) => {
-            let newX = vert[0]*Math.cos(this.rotation) - vert[1]*Math.sin(this.rotation)
-            let newY = vert[0]*Math.sin(this.rotation) + vert[1]*Math.cos(this.rotation)
+            let newX = vert[0]*Math.cos(this.rotation) + vert[1]*Math.sin(this.rotation)
+            let newY = vert[1]*Math.cos(this.rotation) - vert[0]*Math.sin(this.rotation)
             new_vertices.push([newX, newY])
         })
 
