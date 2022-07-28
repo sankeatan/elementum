@@ -103,7 +103,7 @@ export function initCardSlots(collection: CanvasEntityCollection) {
     for(const offset_mult of [-1, 1]) {
       let y_pos = AppComponent.canvasHeight/2 + offset_mult * (card_height + ypad)/2
       let entity = new RectangleCanvasEntity(x_pos, y_pos, card_width, card_height,
-        {style: {fillStyle: i==2?"blue":"red"}})
+        {style: {fillStyle: i==2?"blue":"red"}, gamePieceType: "Slot", playerSlot: offset_mult==1?"player1":"player2", actionSlot:i==0?"attack1":i==1?"attack2":"defend"})
       collection.add(entity)
     }
   }

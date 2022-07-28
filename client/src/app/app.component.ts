@@ -5,7 +5,7 @@ import { elements, initElements } from './display/elements'
 import { initCards, initCardSlots } from './display/cards'
 import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/entities'
 import { clamp } from './utility'
-import { BoardState, PlayerMove, elementNames, ElementName, slotNames, SlotName, PlayerName, startBoard } from '../../../shared/shared'
+import { ElementCluster, PlayerAction, ElementName, PlayerSlot } from '../../../shared/shared'
 import { environment } from 'src/environments/environment'
 
 @Component({
@@ -26,11 +26,9 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   private socket: Socket
 
-  private elementCollection: CanvasEntityCollection = new CanvasEntityCollection()
-  private cardCollection: CanvasEntityCollection = new CanvasEntityCollection()
-  private cardSlotCollection: CanvasEntityCollection = new CanvasEntityCollection()
+  private entityCollection: CanvasEntityCollection = new CanvasEntityCollection()
 
-  private boardState: BoardState = startBoard()
+  private boardState: ElementCluster = new ElementCluster()
 
   private grabbedEntity: CanvasEntity = null
   private grabbedOffsetX: number = 0
@@ -39,20 +37,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   public static readonly canvasWidth: number = 800
   public static readonly canvasHeight: number = 600
 
-  public readonly player: PlayerName = ['board1', 'board2'][Math.random() < 0.5 ? 0 : 1] as PlayerName // stupid thing that we'll obviously replace
-  public readonly slotNames: SlotName[] = slotNames
-  private playerSlots: PlayerMove = {'attack1': null, 'attack2': null, 'defend': null}
-
-  public hand(): ElementName[] {
-    return elementNames.filter(el => !(Object.values(this.playerSlots).includes(el as ElementName)))
-  }
-
-  public handPlusSlot(slot: string) {
-    let hand = this.hand()
-    let slotElement = this.playerSlots[slot]
-    if(slotElement) hand.push(slotElement)
-    return hand
-  }
+  public readonly player: PlayerSlot = ['player1', 'player2'][Math.random() < 0.5 ? 0 : 1] as PlayerSlot // stupid thing that we'll obviously replace
+  public readonly playerAction: PlayerAction = new PlayerAction()
 
   public ngOnInit(): void {
     this.socket = io(environment.serverURL, environment.IoConnectionOptions)
@@ -65,7 +51,6 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.socket.close()
     })
   }
-
 
   @HostListener('window:resize', ['$event'])
   private updateContextBounds() {
@@ -86,9 +71,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     })
 
 
-    initElements(this.elementCollection)
-    initCardSlots(this.cardSlotCollection)
-    initCards(this.cardCollection)
+    initElements(this.entityCollection)
+    initCardSlots(this.entityCollection)
+    initCards(this.entityCollection)
     this.reDraw()
   }
 
@@ -105,30 +90,9 @@ export class AppComponent implements OnInit, AfterViewInit {
   private canvasClampY(input: number) {
     return clamp(input, 0, this.gameCanvas.nativeElement.height)
   }
-
-  public placeCard(slot: string, element: string) {
-    if(!(elementNames.includes(element as ElementName))) {
-      console.error(`Bad element name: ${element}`)
-      return
-    }
-
-    if(!(this.hand().includes(element as ElementName))) {
-      console.error(`Tried to place element not in hand: ${element}`)
-      return
-    }
-
-    this.playerSlots[slot] = element
-  }
   
-
-  public playCards() {
-    let move: PlayerMove = {
-      attack1: this.playerSlots.attack1,
-      attack2: this.playerSlots.attack2,
-      defend: this.playerSlots.defend
-    }
-
-    this.socket.emit("playCards", {'player': this.player, 'move': move})
+  public submitAction() {
+    this.socket.emit("playCards", {'player': this.player, 'action': this.playerAction})
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -140,13 +104,19 @@ export class AppComponent implements OnInit, AfterViewInit {
   mouseDown(event: MouseEvent | TouchEvent) {
     let cursorPosition = this.getCursorPosition(event)
 
-    console.log(`${cursorPosition.y} vs ${this.canvasClampY(cursorPosition.y)}`)
     if(cursorPosition.x != this.canvasClampX(cursorPosition.x)
     || cursorPosition.y != this.canvasClampY(cursorPosition.y)) {
         return
     }
 
-    this.grabbedEntity = this.cardCollection.getClicked(cursorPosition.x, cursorPosition.y, true)
+    let clickedEntity = this.entityCollection.getEntityAt(cursorPosition.x, cursorPosition.y, true)
+
+    if(clickedEntity.draggable == false) {
+      // TODO: play a bounce animation or something if you can't drag the entity
+      return
+    }
+
+    this.grabbedEntity = clickedEntity
 
     if(this.grabbedEntity) {
       this.grabbedOffsetX = cursorPosition.x - this.grabbedEntity.x_pos
@@ -159,6 +129,16 @@ export class AppComponent implements OnInit, AfterViewInit {
   @HostListener('touchcancel', ['$event'])
   @HostListener('window:mouseup', ['$event'])
   mouseUp(event: MouseEvent | TouchEvent) {
+    if(this.grabbedEntity?.gamePieceType == "Card") {
+      let cursorPosition = this.getCursorPosition(event)
+      let entityBelow = this.entityCollection.getEntityBelow(cursorPosition.x, cursorPosition.y, this.grabbedEntity)
+      if(entityBelow.gamePieceType == "Slot" && entityBelow.playerSlot == this.player && entityBelow.) {
+        // TODO: put this card into the slot
+        // TODO URGENT: just make CardSlotCanvasEntity, CardCanvasEntity, and ElementCanvasEntity classes and give them the appropriate properties
+      }
+    }
+
+    // Let go of the draggable entity
     this.grabbedEntity = null
   }
 

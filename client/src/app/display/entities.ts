@@ -1,7 +1,9 @@
 
 // TODO: add ability to round the edges of polygons:
-// https://stackoverflow.com/a/3368118/19585452
 
+import { ActionSlot, PlayerSlot } from "../../../../shared/shared"
+
+// https://stackoverflow.com/a/3368118/19585452
 export class CanvasEntityCollection {
     public displayObjects: CanvasEntity[] = []
     // not used currently. may want to implement for scaling the collection for different canvas sizes
@@ -12,11 +14,11 @@ export class CanvasEntityCollection {
             element.draw(ctx)
         })
     }
-
-    public getClicked(x: number, y: number, bringToFront: boolean = false): CanvasEntity {
+    
+    private getEntity(x: number, y: number, bringToFront: boolean, ignoreEntity: CanvasEntity): CanvasEntity {
         for(let i=this.displayObjects.length-1; i>=0; i--) {
             let clicked_obj = this.displayObjects[i]
-            if(clicked_obj.isInside(x, y)) {
+            if(clicked_obj != ignoreEntity && clicked_obj.isInside(x, y)) {
                 if(bringToFront) {
                     // move the clicked object to the end of the array
                     this.displayObjects.push(this.displayObjects.splice(i,1)[0])
@@ -28,13 +30,24 @@ export class CanvasEntityCollection {
         return null
     }
 
+    public getEntityAt(x: number, y: number, bringToFront: boolean = false): CanvasEntity {
+        return this.getEntity(x, y, bringToFront, null)
+    }
+
+    public getEntityBelow(x: number, y: number, entity: CanvasEntity): CanvasEntity {
+        return this.getEntity(x, y, false, entity)
+    }
+
     public add(displayObject: CanvasEntity): void {
         this.displayObjects.push(displayObject)
     }
 }
 
 export abstract class CanvasEntity {
-    public fixed: boolean = false
+    public draggable: boolean = false
+    public gamePieceType?: "Card" | "Slot" | "Element"
+    public playerSlot?: PlayerSlot
+    public actionSlot?: ActionSlot
     public x_pos: number = 0
     public y_pos: number = 0
     public alternateColor?: string = '#111'
@@ -171,8 +184,12 @@ export class PolygonCanvasEntity extends CanvasEntity {
     }
 
     public rotate(angle: number): void {
+        this.setRotation((this.rotation + angle))
+    }
+
+    public setRotation(angle: number): void {
         // the rotation angle is rounded to increase hits in rotation cache at the cost of some precision
-        this.rotation = Math.round(angle*100)/100
+        this.rotation = Math.round((angle%(2*Math.PI))*100)/100
     }
 
     // https://stackoverflow.com/a/12161405/19585452

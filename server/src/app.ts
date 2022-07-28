@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io'
-import { Board, BoardState, ElementName, PlayerMove, PlayerName, startBoard } from '../../shared/shared'
+import { ElementCluster, ElementCluster, ElementName, PlayerMove, PlayerName, startBoard } from '../../shared/shared'
 
 const Express = require("express")()
 const Http = require("http").Server(Express)
@@ -14,7 +14,7 @@ function toggleElement(board: PlayerName, element: ElementName): void {
 Socketio.on("connection", (socket: Socket) => {
     socket.on("playCards", (data: {player: PlayerName, move: PlayerMove}) => {
 
-        let enemy: PlayerName = data.player == 'board1' ? 'board2' : 'board1'
+        let enemy: PlayerName = data.player == 'player1' ? 'player2' : 'player1'
         toggleElement(enemy, data.move.attack1)
         toggleElement(enemy, data.move.attack2)
         toggleElement(data.player, data.move.defend)

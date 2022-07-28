@@ -48,8 +48,8 @@ export const elements: any = [
 
 export function initElements(display: CanvasEntityCollection) {
   for(const params of [
-    {name: "board1", x: AppComponent.canvasWidth * 3/4, y: AppComponent.canvasHeight * 3/4, rotation: 0},
-    {name: "board2", x: AppComponent.canvasWidth * 3/4, y: AppComponent.canvasHeight * 1/4, rotation: Math.PI}
+    {name: "player1", x: AppComponent.canvasWidth * 3/4, y: AppComponent.canvasHeight * 3/4, rotation: 0},
+    {name: "player2", x: AppComponent.canvasWidth * 3/4, y: AppComponent.canvasHeight * 1/4, rotation: Math.PI}
   ]) {
     let center_distance = AppComponent.canvasWidth * 1/8
     let element_radius = AppComponent.canvasWidth * 1/19
