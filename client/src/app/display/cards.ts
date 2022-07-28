@@ -1,5 +1,5 @@
 import { AppComponent } from '../app.component'
-import { RectangleCanvasEntity, CanvasEntityCollection, PolygonCanvasEntity } from './display'
+import { RectangleCanvasEntity, CanvasEntityCollection, PolygonCanvasEntity } from './entities'
 
 export interface Card {
   strokeStyle: string

@@ -1,7 +1,7 @@
 import { ElementRef } from '@angular/core'
 import { bufferToggle } from 'rxjs'
 import { AppComponent } from '../app.component'
-import { CanvasEntity, CircleCanvasEntity, CanvasEntityCollection } from './display'
+import { CanvasEntity, CircleCanvasEntity, CanvasEntityCollection } from './entities'
 
 export const elements: any = [
   {
