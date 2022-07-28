@@ -16,14 +16,10 @@ export class EntityCollection {
         })
     }
 
-    private getEntity(x: number, y: number, bringToFront: boolean, ignoreEntity: Entity): Entity {
+    private getEntity(x: number, y: number, ignoreEntity: Entity): Entity {
         for(let i=this.entities.length-1; i>=0; i--) {
             let clicked_obj = this.entities[i]
             if(clicked_obj != ignoreEntity && clicked_obj.isInside(x, y)) {
-                if(bringToFront) {
-                    // move the clicked object to the end of the array
-                    this.entities.push(this.entities.splice(i,1)[0])
-                }
                 return clicked_obj
             }
         }
@@ -31,12 +27,17 @@ export class EntityCollection {
         return null
     }
 
-    public getEntityAt(x: number, y: number, bringToFront: boolean = false): Entity {
-        return this.getEntity(x, y, bringToFront, null)
+    public getEntityAt(x: number, y: number): Entity {
+        return this.getEntity(x, y, null)
     }
 
     public getEntityBelow(x: number, y: number, entity: Entity): Entity {
-        return this.getEntity(x, y, false, entity)
+        return this.getEntity(x, y, entity)
+    }
+
+    public bringToFront(entity: Entity) {
+        // move the clicked object to the end of the array
+        this.entities.push(this.entities.splice(this.entities.indexOf(entity),1)[0])
     }
 
     public add(entity: Entity): void {
@@ -62,7 +63,7 @@ export abstract class Entity {
 
     public isInside(x: number, y: number) {
         let relative_x = x - this.x_pos
-        let relative_y = y = this.y_pos
+        let relative_y = y - this.y_pos
 
         if(this.boundingShape) {
             return this.boundingShape.isInside(relative_x, relative_y)

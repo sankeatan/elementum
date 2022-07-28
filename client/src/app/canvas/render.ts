@@ -61,7 +61,7 @@ export class CircleCanvasRender extends SimpleCanvasRender {
     }
 
     public rotate(angle: number): void {
-        this.rotation = angle % (2*Math.PI)
+        this.rotation = (this.rotation + angle) % (2*Math.PI)
     }
 }
 
@@ -81,6 +81,7 @@ export class PolygonCanvasRender extends SimpleCanvasRender {
     public isInside(x: number, y: number): boolean {
         let verts = this.getRotatedVertices()
         let inside = false
+
         for(let i = 0, j = verts.length-1; i < verts.length; j = i++ ) {
             if( ((verts[i][1] > y) != (verts[j][1] > y)) &&
                 (x < (verts[j][0] - verts[i][0]) * (y - verts[i][1]) /
@@ -88,6 +89,7 @@ export class PolygonCanvasRender extends SimpleCanvasRender {
                     inside = !inside
             }
         }
+
         return inside
     }
 
@@ -149,7 +151,7 @@ export class RectangleCanvasRender extends PolygonCanvasRender {
             [-width/2, -height/2],
             [width/2, -height/2],
             [width/2, height/2],
-            [-width/2, height/2]
+            [-width/2, height/2],
         ]
         super(vertices, style)
         this.width = width

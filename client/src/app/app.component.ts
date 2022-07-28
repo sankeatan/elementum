@@ -15,7 +15,7 @@ import { ElementEntity } from './entities/elements'
   styleUrls: ['./app.component.css']
 })
 
-export class AppComponent implements OnInit, AfterViewInit {
+export class ElementumGame implements OnInit, AfterViewInit {
   @ViewChild("game")
   private gameCanvas: ElementRef
 
@@ -37,6 +37,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   public static readonly canvasWidth: number = 800
   public static readonly canvasHeight: number = 600
+
+  private FPS: number = 60
 
   public static readonly player: PlayerSlot = ['player1', 'player2'][Math.random() < 0.5 ? 0 : 1] as PlayerSlot // stupid thing that we'll obviously replace
   public readonly playerAction: PlayerAction = new PlayerAction()
@@ -63,19 +65,20 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   public ngAfterViewInit(): void {
     this.context = this.gameCanvas.nativeElement.getContext("2d")
-    this.context.canvas.width = AppComponent.canvasWidth
-    this.context.canvas.height = AppComponent.canvasHeight
+    this.context.canvas.width = ElementumGame.canvasWidth
+    this.context.canvas.height = ElementumGame.canvasHeight
     this.updateContextBounds()
     this.socket.on("gameUpdate", (update) => {
       this.boardState = update
       this.updateElements()
     })
 
-
     initElements(this.entityCollection)
     initCardSlots(this.entityCollection)
     initCards(this.entityCollection)
+
     this.reDraw()
+    setInterval(() => this.reDraw(), 1000/this.FPS)
   }
 
   private getCursorPosition(event: MouseEvent | TouchEvent) {
@@ -93,7 +96,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
   
   public submitAction() {
-    this.socket.emit("playCards", {'player': AppComponent.player, 'action': this.playerAction})
+    this.socket.emit("submitAction", {'player': ElementumGame.player, 'action': this.playerAction})
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -110,23 +113,24 @@ export class AppComponent implements OnInit, AfterViewInit {
         return
     }
 
-    let clickedEntity = this.entityCollection.getEntityAt(cursorPosition.x, cursorPosition.y, true)
+    let clickedEntity = this.entityCollection.getEntityAt(cursorPosition.x, cursorPosition.y)
 
     if(clickedEntity == undefined) {
       return
     }
 
-    if((clickedEntity instanceof CardEntity) == false || (clickedEntity as CardEntity).playerSlot) {
+    if((clickedEntity instanceof CardEntity) == false || (clickedEntity as CardEntity).playerSlot != ElementumGame.player) {
       // TODO: play a bounce animation or something if you can't drag the entity
       return
     }
 
     this.grabbedEntity = clickedEntity
+    this.entityCollection.bringToFront(this.grabbedEntity)
 
     if(this.grabbedEntity) {
+      console.log(`grabbed ${this.grabbedEntity}`)
       this.grabbedOffsetX = cursorPosition.x - this.grabbedEntity.x_pos
       this.grabbedOffsetY = cursorPosition.y - this.grabbedEntity.y_pos
-      this.grabbedEntity.draw(this.context)
     }
   }
 
@@ -135,9 +139,11 @@ export class AppComponent implements OnInit, AfterViewInit {
   @HostListener('window:mouseup', ['$event'])
   mouseUp(event: MouseEvent | TouchEvent) {
     if(this.grabbedEntity instanceof CardEntity) {
-      let cursorPosition = this.getCursorPosition(event)
-      let entityBelow = this.entityCollection.getEntityBelow(cursorPosition.x, cursorPosition.y, this.grabbedEntity)
-      if((entityBelow as CardSlotEntity).playerSlot == AppComponent.player && entityBelow) {
+      let card = this.grabbedEntity
+      let entityBelow = this.entityCollection.getEntityBelow(card.x_pos, card.y_pos, this.grabbedEntity)
+      if(entityBelow && (entityBelow as CardSlotEntity).playerSlot == ElementumGame.player) {
+        let cardSlot = entityBelow as CardSlotEntity
+        this.playerAction[cardSlot.actionSlot] = card.cardType
         // TODO: put this card into the slot
         // TODO URGENT: just make CardSlotCanvasEntity, CardCanvasEntity, and ElementCanvasEntity classes and give them the appropriate properties
       }
@@ -159,18 +165,17 @@ export class AppComponent implements OnInit, AfterViewInit {
     let cursorPosition = this.getCursorPosition(event)
     this.grabbedEntity.x_pos = this.canvasClampX(cursorPosition.x - this.grabbedOffsetX)
     this.grabbedEntity.y_pos = this.canvasClampY(cursorPosition.y - this.grabbedOffsetY)
-
-    this.reDraw()
   }
 
-  reDraw(){
+  reDraw(): void {
     this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
     this.entityCollection.draw(this.context)
     this.context.strokeStyle = "black"
-    this.context.lineTo(0, AppComponent.canvasHeight/2)
-    this.context.lineTo(AppComponent.canvasWidth, AppComponent.canvasHeight/2)
+    this.context.lineTo(0, ElementumGame.canvasHeight/2)
+    this.context.lineTo(ElementumGame.canvasWidth, ElementumGame.canvasHeight/2)
   }
-  updateElements(){
+
+  updateElements(): void {
     this.entityCollection.entities.forEach(entity => {
       // TODO: Check if element entity first
       if(entity instanceof ElementEntity) {
@@ -178,6 +183,5 @@ export class AppComponent implements OnInit, AfterViewInit {
         element.activated = this.boardState[element.playerSlot][element.elementName]
       }
     })
-    this.reDraw()
   }
 }

@@ -18,12 +18,22 @@ Socketio.on("connection", (socket: Socket) => {
     console.log("Client connected")
 
     socket.on("submitAction", (data: {player: PlayerSlot, move: PlayerAction}) => {
-        let enemy: PlayerSlot = data.player == 'player1' ? 'player2' : 'player1'
-        toggleElement(enemy, data.move.attack1)
-        toggleElement(enemy, data.move.attack2)
-        toggleElement(data.player, data.move.defend)
+        console.log("Received submitAction...")
+        try {
+            let enemy: PlayerSlot = data.player == 'player1' ? 'player2' : 'player1'
 
-        socket.emit("gameUpdate", game)
+            toggleElement(enemy, data.move.attack1)
+            toggleElement(enemy, data.move.attack2)
+            toggleElement(data.player, data.move.defend)
+
+            socket.emit("gameUpdate", game)
+        }
+        catch(e) {
+            console.log(e.message)
+        }
+        finally {
+            console.log("Processing complete.")
+        }
     })
 })
 

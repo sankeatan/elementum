@@ -1,9 +1,6 @@
-import { AppComponent } from '../app.component'
 import { Entity } from './entities'
-import { ElementName, PlayerSlot } from '../../../../shared/shared'
+import { CardType, PlayerSlot } from '../../../../shared/shared'
 import { RectangleCanvasRender } from '../canvas/render'
-
-export type CardType = ElementName | "wand" | "HIDDEN"
 
 export const cardProperties: {[key: string]: any} = {
   "fire": {
