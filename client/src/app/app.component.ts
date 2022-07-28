@@ -2,21 +2,11 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, HostListener }
 import { DefaultEventsMap } from '@socket.io/component-emitter'
 import { io, Socket } from 'socket.io-client'
 import { elements, initElements } from './display/elements'
-import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/display'
+import { initCards, initCardSlots } from './display/cards'
+import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/entities'
 import { clamp } from './utility'
-import { GameState, PlayerMove, elementNames, ElementName, slotNames, SlotName, PlayerName } from '../../../shared/shared'
-
-const config = {
-  Environment: 'Prod',
-  IoConnectionOptions: {
-    reconnectionDelay: 100,
-    reconnection: true,
-    reconnectionAttemps: 2000,
-    transports: ['websocket'],
-    agent: false,
-    upgrade: false,
-    rejectUnauthorized: false  }
-}
+import { BoardState, PlayerMove, elementNames, ElementName, slotNames, SlotName, PlayerName, startBoard } from '../../../shared/shared'
+import { environment } from 'src/environments/environment'
 
 @Component({
   selector: 'app-root',
@@ -36,18 +26,24 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   private socket: Socket
 
-  private collection: CanvasEntityCollection = new CanvasEntityCollection()
+  private elementCollection: CanvasEntityCollection = new CanvasEntityCollection()
+  private cardCollection: CanvasEntityCollection = new CanvasEntityCollection()
+  private cardSlotCollection: CanvasEntityCollection = new CanvasEntityCollection()
+
+  private boardState: BoardState = startBoard()
 
   private grabbedEntity: CanvasEntity = null
   private grabbedOffsetX: number = 0
   private grabbedOffsetY: number = 0
 
-  public readonly player: PlayerName = ['player1', 'player2'][Math.random() < 0.5 ? 0 : 1] as PlayerName // stupid thing that we'll obviously replace
+  public static readonly canvasWidth: number = 800
+  public static readonly canvasHeight: number = 600
+
+  public readonly player: PlayerName = ['board1', 'board2'][Math.random() < 0.5 ? 0 : 1] as PlayerName // stupid thing that we'll obviously replace
   public readonly slotNames: SlotName[] = slotNames
   private playerSlots: PlayerMove = {'attack1': null, 'attack2': null, 'defend': null}
 
   public hand(): ElementName[] {
-    // console.log(this.playerSlots)
     return elementNames.filter(el => !(Object.values(this.playerSlots).includes(el as ElementName)))
   }
 
@@ -59,30 +55,15 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   public ngOnInit(): void {
-    switch(config.Environment) {
-      case 'Local':
-        this.socket = io("http://localhost:3000", config.IoConnectionOptions)
-        break
-
-      case 'Dev':
-        console.error("Development server does not exist")
-        break
-
-      case 'Prod':
-        this.socket = io("https://hogbod.dev", config.IoConnectionOptions)
-        break
-
-      default:
-        console.error(`Invalid environment name: ${config.Environment}`)
-    }
+    this.socket = io(environment.serverURL, environment.IoConnectionOptions)
 
     this.socket.on("connect_error", (err) => {
-      console.log(err)
-    });
+      console.error(err)
+    })
 
     window.addEventListener('beforeunload', () => {
       this.socket.close()
-    });
+    })
   }
 
 
@@ -96,16 +77,19 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   public ngAfterViewInit(): void {
     this.context = this.gameCanvas.nativeElement.getContext("2d")
+    this.context.canvas.width = AppComponent.canvasWidth
+    this.context.canvas.height = AppComponent.canvasHeight
     this.updateContextBounds()
-    this.socket.on("gameUpdate", (update) =>{
-      console.log(update);
+    this.socket.on("gameUpdate", (update) => {
+      this.boardState = update
+      this.updateElements()
     })
 
-    // drawBoard(this.gameCanvas)
-    initElements(this.collection)
-    this.collection.add(new RectangleCanvasEntity(60, 110, 100, 200))
-    this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
-    this.collection.draw(this.context)
+
+    initElements(this.elementCollection)
+    initCardSlots(this.cardSlotCollection)
+    initCards(this.cardCollection)
+    this.reDraw()
   }
 
   private getCursorPosition(event: MouseEvent | TouchEvent) {
@@ -144,14 +128,11 @@ export class AppComponent implements OnInit, AfterViewInit {
       defend: this.playerSlots.defend
     }
 
-    this.socket.emit("playCards", {'player': this.player, 'move': move});
+    this.socket.emit("playCards", {'player': this.player, 'move': move})
   }
 
   @HostListener('window:keydown', ['$event'])
   keyEvent(event: KeyboardEvent) {
-    console.log(event.code)
-    // event.preventDefault() // use this to prevent default behavior for keys used for the game
-    console.log(event)
   }
 
   @HostListener('touchstart', ['$event'])
@@ -159,12 +140,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   mouseDown(event: MouseEvent | TouchEvent) {
     let cursorPosition = this.getCursorPosition(event)
 
+    console.log(`${cursorPosition.y} vs ${this.canvasClampY(cursorPosition.y)}`)
     if(cursorPosition.x != this.canvasClampX(cursorPosition.x)
     || cursorPosition.y != this.canvasClampY(cursorPosition.y)) {
         return
     }
 
-    this.grabbedEntity = this.collection.getClicked(cursorPosition.x, cursorPosition.y, true)
+    this.grabbedEntity = this.cardCollection.getClicked(cursorPosition.x, cursorPosition.y, true)
 
     if(this.grabbedEntity) {
       this.grabbedOffsetX = cursorPosition.x - this.grabbedEntity.x_pos
@@ -184,7 +166,6 @@ export class AppComponent implements OnInit, AfterViewInit {
   @HostListener('window:mousemove', ['$event'])
   mouseMove(event: MouseEvent | TouchEvent): void {
     event.preventDefault()
-    console.log("test")
 
     if(this.grabbedEntity == null) {
       return
@@ -194,6 +175,19 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.grabbedEntity.x_pos = this.canvasClampX(cursorPosition.x - this.grabbedOffsetX)
     this.grabbedEntity.y_pos = this.canvasClampY(cursorPosition.y - this.grabbedOffsetY)
 
-    this.collection.draw(this.context)
+    this.reDraw()
+  }
+
+  reDraw(){
+    this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
+    this.elementCollection.draw(this.context)
+    this.cardSlotCollection.draw(this.context)
+    this.cardCollection.draw(this.context)
+  }
+  updateElements(){
+    this.elementCollection.displayObjects.forEach(elem => {
+      elem.toggle = this.boardState[elem["board"]][elem["name"]]
+    })
+    this.reDraw()
   }
 }
