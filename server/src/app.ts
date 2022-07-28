@@ -1,20 +1,24 @@
 import { Socket } from 'socket.io'
-import { ElementCluster, ElementCluster, ElementName, PlayerMove, PlayerName, startBoard } from '../../shared/shared'
+import { ElementCluster, ElementName, PlayerAction, PlayerSlot } from '../../shared/shared'
 
 const Express = require("express")()
 const Http = require("http").Server(Express)
 const Socketio = require("socket.io")(Http)
 
-var game = startBoard()
+var game = {
+    "player1": new ElementCluster(),
+    "player2": new ElementCluster()
+}
 
-function toggleElement(board: PlayerName, element: ElementName): void {
-    game[board][element] = !game[board][element]
+function toggleElement(playerSlot: PlayerSlot, element: ElementName): void {
+    game[playerSlot][element] = !game[playerSlot][element]
 }
 
 Socketio.on("connection", (socket: Socket) => {
-    socket.on("playCards", (data: {player: PlayerName, move: PlayerMove}) => {
+    console.log("Client connected")
 
-        let enemy: PlayerName = data.player == 'player1' ? 'player2' : 'player1'
+    socket.on("submitAction", (data: {player: PlayerSlot, move: PlayerAction}) => {
+        let enemy: PlayerSlot = data.player == 'player1' ? 'player2' : 'player1'
         toggleElement(enemy, data.move.attack1)
         toggleElement(enemy, data.move.attack2)
         toggleElement(data.player, data.move.defend)

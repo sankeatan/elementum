@@ -1,12 +1,13 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, HostListener } from '@angular/core'
-import { DefaultEventsMap } from '@socket.io/component-emitter'
 import { io, Socket } from 'socket.io-client'
-import { elements, initElements } from './display/elements'
-import { initCards, initCardSlots } from './display/cards'
-import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/entities'
+import { Entity, EntityCollection } from './entities/entities'
 import { clamp } from './utility'
 import { ElementCluster, PlayerAction, ElementName, PlayerSlot } from '../../../shared/shared'
 import { environment } from 'src/environments/environment'
+import { initCards, initCardSlots, initElements } from './control/setup'
+import { CardEntity } from './entities/cards'
+import { CardSlotEntity } from './entities/cardslots'
+import { ElementEntity } from './entities/elements'
 
 @Component({
   selector: 'app-root',
@@ -26,18 +27,18 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   private socket: Socket
 
-  private entityCollection: CanvasEntityCollection = new CanvasEntityCollection()
+  private entityCollection: EntityCollection = new EntityCollection()
 
   private boardState: ElementCluster = new ElementCluster()
 
-  private grabbedEntity: CanvasEntity = null
+  private grabbedEntity: Entity = null
   private grabbedOffsetX: number = 0
   private grabbedOffsetY: number = 0
 
   public static readonly canvasWidth: number = 800
   public static readonly canvasHeight: number = 600
 
-  public readonly player: PlayerSlot = ['player1', 'player2'][Math.random() < 0.5 ? 0 : 1] as PlayerSlot // stupid thing that we'll obviously replace
+  public static readonly player: PlayerSlot = ['player1', 'player2'][Math.random() < 0.5 ? 0 : 1] as PlayerSlot // stupid thing that we'll obviously replace
   public readonly playerAction: PlayerAction = new PlayerAction()
 
   public ngOnInit(): void {
@@ -92,7 +93,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
   
   public submitAction() {
-    this.socket.emit("playCards", {'player': this.player, 'action': this.playerAction})
+    this.socket.emit("playCards", {'player': AppComponent.player, 'action': this.playerAction})
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -111,7 +112,11 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     let clickedEntity = this.entityCollection.getEntityAt(cursorPosition.x, cursorPosition.y, true)
 
-    if(clickedEntity.draggable == false) {
+    if(clickedEntity == undefined) {
+      return
+    }
+
+    if((clickedEntity instanceof CardEntity) == false || (clickedEntity as CardEntity).playerSlot) {
       // TODO: play a bounce animation or something if you can't drag the entity
       return
     }
@@ -129,10 +134,10 @@ export class AppComponent implements OnInit, AfterViewInit {
   @HostListener('touchcancel', ['$event'])
   @HostListener('window:mouseup', ['$event'])
   mouseUp(event: MouseEvent | TouchEvent) {
-    if(this.grabbedEntity?.gamePieceType == "Card") {
+    if(this.grabbedEntity instanceof CardEntity) {
       let cursorPosition = this.getCursorPosition(event)
       let entityBelow = this.entityCollection.getEntityBelow(cursorPosition.x, cursorPosition.y, this.grabbedEntity)
-      if(entityBelow.gamePieceType == "Slot" && entityBelow.playerSlot == this.player && entityBelow.) {
+      if((entityBelow as CardSlotEntity).playerSlot == AppComponent.player && entityBelow) {
         // TODO: put this card into the slot
         // TODO URGENT: just make CardSlotCanvasEntity, CardCanvasEntity, and ElementCanvasEntity classes and give them the appropriate properties
       }
@@ -160,13 +165,18 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   reDraw(){
     this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
-    this.elementCollection.draw(this.context)
-    this.cardSlotCollection.draw(this.context)
-    this.cardCollection.draw(this.context)
+    this.entityCollection.draw(this.context)
+    this.context.strokeStyle = "black"
+    this.context.lineTo(0, AppComponent.canvasHeight/2)
+    this.context.lineTo(AppComponent.canvasWidth, AppComponent.canvasHeight/2)
   }
   updateElements(){
-    this.elementCollection.displayObjects.forEach(elem => {
-      elem.toggle = this.boardState[elem["board"]][elem["name"]]
+    this.entityCollection.entities.forEach(entity => {
+      // TODO: Check if element entity first
+      if(entity instanceof ElementEntity) {
+        let element = entity as ElementEntity
+        element.activated = this.boardState[element.playerSlot][element.elementName]
+      }
     })
     this.reDraw()
   }

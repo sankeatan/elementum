@@ -5,19 +5,14 @@
   </canvas>
   <br>
   <div style="margin: auto; width: fit-content;">
-    <ng-container *ngFor="let slot of slotNames">
+    <ng-container *ngFor="let action of playerAction | keyvalue">
       <div style="display: inline-block; margin: 0.5rem 2rem; text-align: center;">
-        <label for="{{slot}}">{{slot}}</label><br>
-        <select #elementSlot (change)="placeCard(slot, elementSlot.value)" name="{{slot}}">
-          <option selected disable value="none">-- empty --</option>
-          <ng-container  *ngFor="let card of handPlusSlot(slot)">
-            <option value={{card}}>{{card}}</option>
-          </ng-container>
-        </select>
+        <span><b>{{action.key}}</b></span>
+        <span>{{action.value}}</span>
       </div>
     </ng-container>
   </div>
-  <button (click)="playCards()">Submit</button>
+  <button (click)="submitAction()">Submit</button>
 
   <!-- <div>
     <select #test2>
