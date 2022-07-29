@@ -73,6 +73,6 @@ export abstract class Entity {
     }
 
     public rotate(angle: number) {
-        this.render.rotate
+        this.render.rotate(angle)
     }
 }

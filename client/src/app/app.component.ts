@@ -119,19 +119,28 @@ export class ElementumGame implements OnInit, AfterViewInit {
       return
     }
 
-    if((clickedEntity instanceof CardEntity) == false || (clickedEntity as CardEntity).playerSlot != ElementumGame.player) {
+    if(clickedEntity["playerSlot"] != ElementumGame.player) {
       // TODO: play a bounce animation or something if you can't drag the entity
       return
     }
 
+    this.entityCollection.bringToFront(clickedEntity)
+    this.grabbedOffsetX = cursorPosition.x - clickedEntity.x_pos
+    this.grabbedOffsetY = cursorPosition.y - clickedEntity.y_pos
     this.grabbedEntity = clickedEntity
-    this.entityCollection.bringToFront(this.grabbedEntity)
 
-    if(this.grabbedEntity) {
-      console.log(`grabbed ${this.grabbedEntity}`)
-      this.grabbedOffsetX = cursorPosition.x - this.grabbedEntity.x_pos
-      this.grabbedOffsetY = cursorPosition.y - this.grabbedEntity.y_pos
+    // unsocket card from slot
+    if(clickedEntity instanceof CardEntity) {
+      let cardType = clickedEntity.cardType
+      for(const key of Object.keys(this.playerAction)) {
+        if(this.playerAction[key] == cardType) {
+          this.playerAction[key] = undefined
+          break
+        }
+      }
     }
+
+    console.log(clickedEntity)
   }
 
   @HostListener('touchend', ['$event'])
@@ -141,11 +150,13 @@ export class ElementumGame implements OnInit, AfterViewInit {
     if(this.grabbedEntity instanceof CardEntity) {
       let card = this.grabbedEntity
       let entityBelow = this.entityCollection.getEntityBelow(card.x_pos, card.y_pos, this.grabbedEntity)
-      if(entityBelow && (entityBelow as CardSlotEntity).playerSlot == ElementumGame.player) {
+      if(entityBelow && entityBelow instanceof CardSlotEntity && entityBelow.playerSlot == ElementumGame.player) {
         let cardSlot = entityBelow as CardSlotEntity
-        this.playerAction[cardSlot.actionSlot] = card.cardType
-        // TODO: put this card into the slot
-        // TODO URGENT: just make CardSlotCanvasEntity, CardCanvasEntity, and ElementCanvasEntity classes and give them the appropriate properties
+        if(this.playerAction[cardSlot.actionSlot] == undefined) {
+          this.playerAction[cardSlot.actionSlot] = card.cardType
+          card.x_pos = cardSlot.x_pos
+          card.y_pos = cardSlot.y_pos
+        }
       }
     }
 
@@ -177,7 +188,6 @@ export class ElementumGame implements OnInit, AfterViewInit {
 
   updateElements(): void {
     this.entityCollection.entities.forEach(entity => {
-      // TODO: Check if element entity first
       if(entity instanceof ElementEntity) {
         let element = entity as ElementEntity
         element.activated = this.boardState[element.playerSlot][element.elementName]
