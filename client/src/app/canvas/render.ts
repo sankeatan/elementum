@@ -1,3 +1,4 @@
+// TODO: add ability to round the edges of polygons:
 type Style = {[key: string]: any}
 
 export abstract class CanvasRender {

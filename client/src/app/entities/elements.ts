@@ -43,7 +43,6 @@ export const elementProperties: {[key: string]: any} = {
 export class ElementEntity extends Entity {
   public activated: boolean = false
   public activatedRender: CanvasRender
-  public playerSlot: PlayerSlot
   public elementName: ElementName
 
   constructor(x_pos: number, y_pos:number, elementName: ElementName, playerSlot: PlayerSlot) {

@@ -119,7 +119,11 @@ export class ElementumGame implements OnInit, AfterViewInit {
       return
     }
 
-    if(clickedEntity["playerSlot"] != ElementumGame.player) {
+    if(clickedEntity.draggable == false) {
+      return
+    }
+
+    if(clickedEntity.playerSlot != ElementumGame.player) {
       // TODO: play a bounce animation or something if you can't drag the entity
       return
     }
@@ -131,9 +135,8 @@ export class ElementumGame implements OnInit, AfterViewInit {
 
     // unsocket card from slot
     if(clickedEntity instanceof CardEntity) {
-      let cardType = clickedEntity.cardType
       for(const key of Object.keys(this.playerAction)) {
-        if(this.playerAction[key] == cardType) {
+        if(this.playerAction[key] == clickedEntity.cardType) {
           this.playerAction[key] = undefined
           break
         }

@@ -6,16 +6,16 @@ import { ElementEntity, elementProperties } from "../entities/elements"
 import { EntityCollection } from "../entities/entities"
 
 export function initCards(collection: EntityCollection): void {
-  let center_x = ElementumGame.canvasWidth*.3
-  let center_y = ElementumGame.canvasHeight*.8
-  let radius = 100
-  let start_angle = Math.PI * 1/3
-  let end_angle = Math.PI * 1/3
+  let center_x = .3 * ElementumGame.canvasWidth
+  let center_y = 1.1 * ElementumGame.canvasHeight
+  let radius = 0.1 * Math.sqrt(Math.pow(ElementumGame.canvasHeight,2) + Math.pow(ElementumGame.canvasWidth,2))
+  let start_angle = Math.PI * 1/4
+  let end_angle = -Math.PI * 1/4
   let angle_inc = (end_angle - start_angle) / (Object.keys(cardProperties).length-1)
   let angle = start_angle
   for(const cardType of Object.keys(cardProperties)) {
-    let x = center_x + radius * Math.cos(angle)
-    let y = center_y + radius * Math.sin(angle)
+    let x = center_x + radius * Math.cos(angle+Math.PI/2)
+    let y = center_y - radius * Math.sin(angle+Math.PI/2)
     let card = new CardEntity(x, y, cardType as CardType, ElementumGame.player)
     card.rotate(angle)
     collection.add(card)

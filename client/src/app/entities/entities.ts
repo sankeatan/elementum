@@ -1,7 +1,4 @@
-
-// TODO: add ability to round the edges of polygons:
-
-import { ActionSlot, PlayerSlot } from "../../../../shared/shared"
+import { PlayerSlot } from "../../../../shared/shared"
 import { CanvasRender } from "../canvas/render"
 
 // https://stackoverflow.com/a/3368118/19585452
@@ -48,6 +45,8 @@ export class EntityCollection {
 export abstract class Entity {
     public x_pos: number = 0
     public y_pos: number = 0
+    public playerSlot: PlayerSlot = undefined
+    public draggable: boolean = false
     public render: CanvasRender
     public boundingShape: CanvasRender = undefined
 
