@@ -43,26 +43,26 @@ export class EntityCollection {
 }
 
 export abstract class Entity {
-    public x_pos: number = 0
-    public y_pos: number = 0
+    public xPos: number = 0
+    public yPos: number = 0
     public playerSlot: PlayerSlot = undefined
     public draggable: boolean = false
     public render: CanvasRender
     public boundingShape: CanvasRender = undefined
 
-    constructor(x_pos: number, y_pos: number, render: CanvasRender, boundingShape?: CanvasRender) {
-        this.x_pos = x_pos
-        this.y_pos = y_pos
+    constructor(xPos: number, yPos: number, render: CanvasRender, boundingShape?: CanvasRender) {
+        this.xPos = xPos
+        this.yPos = yPos
         this.render = render
     }
 
     public draw(ctx: CanvasRenderingContext2D): void {
-        this.render.draw(ctx, this.x_pos, this.y_pos)
+        this.render.draw(ctx, this.xPos, this.yPos)
     }
 
     public isInside(x: number, y: number) {
-        let relative_x = x - this.x_pos
-        let relative_y = y - this.y_pos
+        let relative_x = x - this.xPos
+        let relative_y = y - this.yPos
 
         if(this.boundingShape) {
             return this.boundingShape.isInside(relative_x, relative_y)

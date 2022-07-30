@@ -12,6 +12,7 @@ var game = {
 
 function toggleElement(playerSlot: PlayerSlot, cardType: CardType): void {
     if(Object.keys(ElementCluster).includes(cardType) == false) {
+        console.log(`${playerSlot}: ${cardType}`)
         return
     }
 
@@ -21,14 +22,14 @@ function toggleElement(playerSlot: PlayerSlot, cardType: CardType): void {
 Socketio.on("connection", (socket: Socket) => {
     console.log("Client connected")
 
-    socket.on("submitAction", (data: {player: PlayerSlot, action: PlayerAction}) => {
+    socket.on("submitAction", (data: {playerSlot: PlayerSlot, playerAction: PlayerAction}) => {
         console.log("Received submitAction...")
         try {
-            let enemy: PlayerSlot = data.player == 'player1' ? 'player2' : 'player1'
+            let enemySlot: PlayerSlot = data.playerSlot == "player1" ? "player2" : "player1"
 
-            toggleElement(enemy, data.action.attack1)
-            toggleElement(enemy, data.action.attack2)
-            toggleElement(enemy, data.action.defend)
+            toggleElement(data.playerSlot, data.playerAction.attack1)
+            toggleElement(enemySlot, data.playerAction.attack2)
+            toggleElement(enemySlot, data.playerAction.defend)
 
             socket.emit("gameUpdate", game)
         }

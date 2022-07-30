@@ -69,9 +69,12 @@ export class CircleCanvasRender extends SimpleCanvasRender {
 export class PolygonCanvasRender extends SimpleCanvasRender {
     private vertices: [x: number, y: number][] = []
     private rotation: number = 0
-    private cached_rotations: {[key:number]: [x: number, y: number][]} = {}
+    private cachedRotations: {[key:number]: [x: number, y: number][]} = {}
 
     constructor(vertices: [number, number][], style?: Style) {
+        if(!vertices || vertices.length < 3) {
+            throw new Error(`PolygonCanvasRender requires at least 3 vertices`)
+        }
         super(style)
         vertices.forEach(vertex => {
             this.vertices.push([vertex[0], vertex[1]])
@@ -123,7 +126,7 @@ export class PolygonCanvasRender extends SimpleCanvasRender {
             return this.vertices
         }
 
-        let cached_rotation = this.cached_rotations[this.rotation]
+        let cached_rotation = this.cachedRotations[this.rotation]
         if(cached_rotation) {
             return cached_rotation
         }
@@ -136,7 +139,7 @@ export class PolygonCanvasRender extends SimpleCanvasRender {
             new_vertices.push([newX, newY])
         })
 
-        this.cached_rotations[this.rotation] = new_vertices
+        this.cachedRotations[this.rotation] = new_vertices
 
         return new_vertices
     }
@@ -164,7 +167,7 @@ export class RectangleCanvasRender extends PolygonCanvasRender {
 //     private path: string
 //     private vertices: [x: number, y: number][]
 
-//     constructor(x_pos: number, y_pos: number, path: string, vertices: [number, number][], options?: {}) {
+//     constructor(xPos: number, yPos: number, path: string, vertices: [number, number][], options?: {}) {
 //         vertices.forEach(vertex => {
 //             this.vertices.push([vertex[0], vertex[1]])
 //         })

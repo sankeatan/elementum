@@ -29,7 +29,8 @@ export class ElementumGame implements OnInit, AfterViewInit {
 
   private entityCollection: EntityCollection = new EntityCollection()
 
-  private boardState: ElementCluster = new ElementCluster()
+  private playerElements: ElementCluster = new ElementCluster()
+  private enemyElements: ElementCluster = new ElementCluster()
 
   private grabbedEntity: Entity = null
   private grabbedOffsetX: number = 0
@@ -40,7 +41,9 @@ export class ElementumGame implements OnInit, AfterViewInit {
 
   private FPS: number = 60
 
-  public static readonly player: PlayerSlot = ['player1', 'player2'][Math.random() < 0.5 ? 0 : 1] as PlayerSlot // stupid thing that we'll obviously replace
+  public static readonly playerSlot: PlayerSlot = ['player1', 'player2'][Math.random() < 0.5 ? 0 : 1] as PlayerSlot // stupid thing that we'll obviously replace
+  public static readonly enemySlot: PlayerSlot = ElementumGame.playerSlot == 'player1' ? 'player2' : 'player1'
+
   public readonly playerAction: PlayerAction = new PlayerAction()
 
   public ngOnInit(): void {
@@ -68,8 +71,10 @@ export class ElementumGame implements OnInit, AfterViewInit {
     this.context.canvas.width = ElementumGame.canvasWidth
     this.context.canvas.height = ElementumGame.canvasHeight
     this.updateContextBounds()
-    this.socket.on("gameUpdate", (update) => {
-      this.boardState = update
+
+    this.socket.on("gameUpdate", (update: {[key:string]: ElementCluster}) => {
+      this.playerElements = update[ElementumGame.playerSlot]
+      this.enemyElements = update[ElementumGame.enemySlot]
       this.updateElements()
     })
 
@@ -96,7 +101,7 @@ export class ElementumGame implements OnInit, AfterViewInit {
   }
   
   public submitAction() {
-    this.socket.emit("submitAction", {'player': ElementumGame.player, 'action': this.playerAction})
+    this.socket.emit("submitAction", {'playerSlot': ElementumGame.playerSlot, 'playerAction': this.playerAction})
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -123,14 +128,14 @@ export class ElementumGame implements OnInit, AfterViewInit {
       return
     }
 
-    if(clickedEntity.playerSlot != ElementumGame.player) {
+    if(clickedEntity.playerSlot != ElementumGame.playerSlot) {
       // TODO: play a bounce animation or something if you can't drag the entity
       return
     }
 
     this.entityCollection.bringToFront(clickedEntity)
-    this.grabbedOffsetX = cursorPosition.x - clickedEntity.x_pos
-    this.grabbedOffsetY = cursorPosition.y - clickedEntity.y_pos
+    this.grabbedOffsetX = cursorPosition.x - clickedEntity.xPos
+    this.grabbedOffsetY = cursorPosition.y - clickedEntity.yPos
     this.grabbedEntity = clickedEntity
 
     // unsocket card from slot
@@ -152,13 +157,13 @@ export class ElementumGame implements OnInit, AfterViewInit {
   mouseUp(event: MouseEvent | TouchEvent) {
     if(this.grabbedEntity instanceof CardEntity) {
       let card = this.grabbedEntity
-      let entityBelow = this.entityCollection.getEntityBelow(card.x_pos, card.y_pos, this.grabbedEntity)
-      if(entityBelow && entityBelow instanceof CardSlotEntity && entityBelow.playerSlot == ElementumGame.player) {
+      let entityBelow = this.entityCollection.getEntityBelow(card.xPos, card.yPos, this.grabbedEntity)
+      if(entityBelow && entityBelow instanceof CardSlotEntity && entityBelow.playerSlot == ElementumGame.playerSlot) {
         let cardSlot = entityBelow as CardSlotEntity
         if(this.playerAction[cardSlot.actionSlot] == undefined) {
           this.playerAction[cardSlot.actionSlot] = card.cardType
-          card.x_pos = cardSlot.x_pos
-          card.y_pos = cardSlot.y_pos
+          card.xPos = cardSlot.xPos
+          card.yPos = cardSlot.yPos
         }
       }
     }
@@ -177,23 +182,35 @@ export class ElementumGame implements OnInit, AfterViewInit {
     }
 
     let cursorPosition = this.getCursorPosition(event)
-    this.grabbedEntity.x_pos = this.canvasClampX(cursorPosition.x - this.grabbedOffsetX)
-    this.grabbedEntity.y_pos = this.canvasClampY(cursorPosition.y - this.grabbedOffsetY)
+    this.grabbedEntity.xPos = this.canvasClampX(cursorPosition.x - this.grabbedOffsetX)
+    this.grabbedEntity.yPos = this.canvasClampY(cursorPosition.y - this.grabbedOffsetY)
   }
 
   reDraw(): void {
     this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
-    this.entityCollection.draw(this.context)
+
+    // draw a dividing line
+    this.context.beginPath()
     this.context.strokeStyle = "black"
     this.context.lineTo(0, ElementumGame.canvasHeight/2)
     this.context.lineTo(ElementumGame.canvasWidth, ElementumGame.canvasHeight/2)
+    this.context.stroke()
+
+    this.entityCollection.draw(this.context)
   }
 
   updateElements(): void {
     this.entityCollection.entities.forEach(entity => {
       if(entity instanceof ElementEntity) {
         let element = entity as ElementEntity
-        element.activated = this.boardState[element.playerSlot][element.elementName]
+        if(element.playerSlot == ElementumGame.playerSlot) {
+          element.activated = this.playerElements[element.elementName]
+          console.log(`set to ${element.activated}`)
+        }
+        else {
+          element.activated = this.enemyElements[element.elementName]
+          console.log(`set to ${element.activated}`)
+        }
       }
     })
   }

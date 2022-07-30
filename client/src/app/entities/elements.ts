@@ -45,9 +45,9 @@ export class ElementEntity extends Entity {
   public activatedRender: CanvasRender
   public elementName: ElementName
 
-  constructor(x_pos: number, y_pos:number, elementName: ElementName, playerSlot: PlayerSlot) {
+  constructor(xPos: number, yPos:number, elementName: ElementName, playerSlot: PlayerSlot) {
     let properties = elementProperties[elementName]
-    super(x_pos, y_pos, new CircleCanvasRender(40, properties.style))
+    super(xPos, yPos, new CircleCanvasRender(40, properties.style))
     this.elementName = elementName
     this.playerSlot = playerSlot
     this.activatedRender = new CircleCanvasRender(40, {...properties.style, fillColor: properties.alternateColor})
@@ -55,7 +55,7 @@ export class ElementEntity extends Entity {
 
   public override draw(ctx: CanvasRenderingContext2D): void {
     if(this.activated) {
-      this.activatedRender.draw(ctx, this.x_pos, this.y_pos)
+      this.activatedRender.draw(ctx, this.xPos, this.yPos)
     }
     else {
       super.draw(ctx)

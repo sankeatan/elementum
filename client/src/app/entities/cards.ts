@@ -52,10 +52,10 @@ export const cardProperties: {[key: string]: any} = {
 export class CardEntity extends Entity {
   public cardType: CardType
   public elementType: ElementName
-  constructor(x_pos: number, y_pos:number, cardType: CardType, playerSlot: PlayerSlot) {
+  constructor(xPos: number, yPos:number, cardType: CardType, playerSlot: PlayerSlot) {
     let height = ElementumGame.canvasHeight * .225
     let width = height * .7159
-    super(x_pos, y_pos, new RectangleCanvasRender(width, height, cardProperties[cardType].style))
+    super(xPos, yPos, new RectangleCanvasRender(width, height, cardProperties[cardType].style))
     this.cardType = cardType
     this.playerSlot = playerSlot
     this.draggable = true

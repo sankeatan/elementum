@@ -22,8 +22,8 @@ export const cardProperties: {[key: string]: any} = {
 
 export class CardSlotEntity extends Entity {
   public actionSlot: ActionSlot
-  constructor(x_pos: number, y_pos:number, actionSlot: ActionSlot, playerSlot: PlayerSlot) {
-    super(x_pos, y_pos, new RectangleCanvasRender(80, 120, cardProperties[actionSlot].style))
+  constructor(xPos: number, yPos:number, actionSlot: ActionSlot, playerSlot: PlayerSlot) {
+    super(xPos, yPos, new RectangleCanvasRender(80, 120, cardProperties[actionSlot].style))
     this.actionSlot = actionSlot
     this.playerSlot = playerSlot
   }
