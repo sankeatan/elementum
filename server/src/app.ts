@@ -11,12 +11,12 @@ var game = {
 }
 
 function toggleElement(playerSlot: PlayerSlot, cardType: CardType): void {
-    if(Object.keys(ElementCluster).includes(cardType) == false) {
-        console.log(`${playerSlot}: ${cardType}`)
-        return
+    try {
+        game[playerSlot][cardType] = !game[playerSlot][cardType]
     }
-
-    game[playerSlot][cardType] = !game[playerSlot][cardType]
+    catch (e) {
+        console.error(`Failed to toggle ${playerSlot}: ${cardType}`)
+    }
 }
 
 Socketio.on("connection", (socket: Socket) => {

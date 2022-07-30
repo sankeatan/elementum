@@ -73,6 +73,8 @@ export class ElementumGame implements OnInit, AfterViewInit {
     this.updateContextBounds()
 
     this.socket.on("gameUpdate", (update: {[key:string]: ElementCluster}) => {
+      console.log(this.playerElements)
+      console.log(this.enemyElements)
       this.playerElements = update[ElementumGame.playerSlot]
       this.enemyElements = update[ElementumGame.enemySlot]
       this.updateElements()
