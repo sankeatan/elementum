@@ -52,6 +52,8 @@ export const cardProperties: {[key: string]: any} = {
 export class CardEntity extends Entity {
   public cardType: CardType
   public elementType: ElementName
+  public override render: RectangleCanvasRender
+
   constructor(xPos: number, yPos:number, cardType: CardType, playerSlot: PlayerSlot) {
     let height = ElementumGame.canvasHeight * .225
     let width = height * .7159

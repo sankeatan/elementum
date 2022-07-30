@@ -157,6 +157,7 @@ export class ElementumGame implements OnInit, AfterViewInit {
   @HostListener('touchcancel', ['$event'])
   @HostListener('window:mouseup', ['$event'])
   mouseUp(event: MouseEvent | TouchEvent) {
+    // snap to card slot
     if(this.grabbedEntity instanceof CardEntity) {
       let card = this.grabbedEntity
       let entityBelow = this.entityCollection.getEntityBelow(card.xPos, card.yPos, this.grabbedEntity)
@@ -166,6 +167,7 @@ export class ElementumGame implements OnInit, AfterViewInit {
           this.playerAction[cardSlot.actionSlot] = card.cardType
           card.xPos = cardSlot.xPos
           card.yPos = cardSlot.yPos
+          card.render.setRotation(0)
         }
       }
     }
