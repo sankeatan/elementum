@@ -1,25 +1,44 @@
 import { Socket } from 'socket.io'
-import { Board, BoardState, ElementName, PlayerMove, PlayerName, startBoard } from '../../shared/shared'
+import { CardType, ElementCluster, ElementName, PlayerAction, PlayerSlot } from '../../shared/shared'
 
 const Express = require("express")()
 const Http = require("http").Server(Express)
 const Socketio = require("socket.io")(Http)
 
-var game = startBoard()
+var game = {
+    "player1": new ElementCluster(),
+    "player2": new ElementCluster()
+}
 
-function toggleElement(board: PlayerName, element: ElementName): void {
-    game[board][element] = !game[board][element]
+function toggleElement(playerSlot: PlayerSlot, cardType: CardType): void {
+    try {
+        game[playerSlot][cardType] = !game[playerSlot][cardType]
+    }
+    catch (e) {
+        console.error(`Failed to toggle ${playerSlot}: ${cardType}`)
+    }
 }
 
 Socketio.on("connection", (socket: Socket) => {
-    socket.on("playCards", (data: {player: PlayerName, move: PlayerMove}) => {
+    console.log("Client connected")
 
-        let enemy: PlayerName = data.player == 'board1' ? 'board2' : 'board1'
-        toggleElement(enemy, data.move.attack1)
-        toggleElement(enemy, data.move.attack2)
-        toggleElement(data.player, data.move.defend)
+    socket.on("submitAction", (data: {playerSlot: PlayerSlot, playerAction: PlayerAction}) => {
+        console.log("Received submitAction...")
+        try {
+            let enemySlot: PlayerSlot = data.playerSlot == "player1" ? "player2" : "player1"
 
-        socket.emit("gameUpdate", game)
+            toggleElement(data.playerSlot, data.playerAction.attack1)
+            toggleElement(enemySlot, data.playerAction.attack2)
+            toggleElement(enemySlot, data.playerAction.defend)
+
+            socket.emit("gameUpdate", game)
+        }
+        catch(e) {
+            console.log(e.message)
+        }
+        finally {
+            console.log("Processing complete.")
+        }
     })
 })
 

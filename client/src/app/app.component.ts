@@ -1,12 +1,13 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, HostListener } from '@angular/core'
-import { DefaultEventsMap } from '@socket.io/component-emitter'
 import { io, Socket } from 'socket.io-client'
-import { elements, initElements } from './display/elements'
-import { initCards, initCardSlots } from './display/cards'
-import { CanvasEntity, CanvasEntityCollection, PolygonCanvasEntity, RectangleCanvasEntity } from './display/entities'
+import { Entity, EntityCollection } from './entities/entities'
 import { clamp } from './utility'
-import { BoardState, PlayerMove, elementNames, ElementName, slotNames, SlotName, PlayerName, startBoard } from '../../../shared/shared'
+import { ElementCluster, PlayerAction, ElementName, PlayerSlot } from '../../../shared/shared'
 import { environment } from 'src/environments/environment'
+import { initCards, initCardSlots, initElements } from './control/setup'
+import { CardEntity } from './entities/cards'
+import { CardSlotEntity } from './entities/cardslots'
+import { ElementEntity } from './entities/elements'
 
 @Component({
   selector: 'app-root',
@@ -14,7 +15,7 @@ import { environment } from 'src/environments/environment'
   styleUrls: ['./app.component.css']
 })
 
-export class AppComponent implements OnInit, AfterViewInit {
+export class ElementumGame implements OnInit, AfterViewInit {
   @ViewChild("game")
   private gameCanvas: ElementRef
 
@@ -26,33 +27,24 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   private socket: Socket
 
-  private elementCollection: CanvasEntityCollection = new CanvasEntityCollection()
-  private cardCollection: CanvasEntityCollection = new CanvasEntityCollection()
-  private cardSlotCollection: CanvasEntityCollection = new CanvasEntityCollection()
+  private entityCollection: EntityCollection = new EntityCollection()
 
-  private boardState: BoardState = startBoard()
+  private playerElements: ElementCluster = new ElementCluster()
+  private enemyElements: ElementCluster = new ElementCluster()
 
-  private grabbedEntity: CanvasEntity = null
+  private grabbedEntity: Entity = null
   private grabbedOffsetX: number = 0
   private grabbedOffsetY: number = 0
 
   public static readonly canvasWidth: number = 800
   public static readonly canvasHeight: number = 600
 
-  public readonly player: PlayerName = ['board1', 'board2'][Math.random() < 0.5 ? 0 : 1] as PlayerName // stupid thing that we'll obviously replace
-  public readonly slotNames: SlotName[] = slotNames
-  private playerSlots: PlayerMove = {'attack1': null, 'attack2': null, 'defend': null}
+  private FPS: number = 60
 
-  public hand(): ElementName[] {
-    return elementNames.filter(el => !(Object.values(this.playerSlots).includes(el as ElementName)))
-  }
+  public static readonly playerSlot: PlayerSlot = ['player1', 'player2'][Math.random() < 0.5 ? 0 : 1] as PlayerSlot // stupid thing that we'll obviously replace
+  public static readonly enemySlot: PlayerSlot = ElementumGame.playerSlot == 'player1' ? 'player2' : 'player1'
 
-  public handPlusSlot(slot: string) {
-    let hand = this.hand()
-    let slotElement = this.playerSlots[slot]
-    if(slotElement) hand.push(slotElement)
-    return hand
-  }
+  public readonly playerAction: PlayerAction = new PlayerAction()
 
   public ngOnInit(): void {
     this.socket = io(environment.serverURL, environment.IoConnectionOptions)
@@ -66,7 +58,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     })
   }
 
-
   @HostListener('window:resize', ['$event'])
   private updateContextBounds() {
     this.contextBoundRight = this.gameCanvas.nativeElement.getBoundingClientRect().right
@@ -77,19 +68,24 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   public ngAfterViewInit(): void {
     this.context = this.gameCanvas.nativeElement.getContext("2d")
-    this.context.canvas.width = AppComponent.canvasWidth
-    this.context.canvas.height = AppComponent.canvasHeight
+    this.context.canvas.width = ElementumGame.canvasWidth
+    this.context.canvas.height = ElementumGame.canvasHeight
     this.updateContextBounds()
-    this.socket.on("gameUpdate", (update) => {
-      this.boardState = update
+
+    this.socket.on("gameUpdate", (update: {[key:string]: ElementCluster}) => {
+      console.log(this.playerElements)
+      console.log(this.enemyElements)
+      this.playerElements = update[ElementumGame.playerSlot]
+      this.enemyElements = update[ElementumGame.enemySlot]
       this.updateElements()
     })
 
+    initElements(this.entityCollection)
+    initCardSlots(this.entityCollection)
+    initCards(this.entityCollection)
 
-    initElements(this.elementCollection)
-    initCardSlots(this.cardSlotCollection)
-    initCards(this.cardCollection)
     this.reDraw()
+    setInterval(() => this.reDraw(), 1000/this.FPS)
   }
 
   private getCursorPosition(event: MouseEvent | TouchEvent) {
@@ -105,30 +101,9 @@ export class AppComponent implements OnInit, AfterViewInit {
   private canvasClampY(input: number) {
     return clamp(input, 0, this.gameCanvas.nativeElement.height)
   }
-
-  public placeCard(slot: string, element: string) {
-    if(!(elementNames.includes(element as ElementName))) {
-      console.error(`Bad element name: ${element}`)
-      return
-    }
-
-    if(!(this.hand().includes(element as ElementName))) {
-      console.error(`Tried to place element not in hand: ${element}`)
-      return
-    }
-
-    this.playerSlots[slot] = element
-  }
   
-
-  public playCards() {
-    let move: PlayerMove = {
-      attack1: this.playerSlots.attack1,
-      attack2: this.playerSlots.attack2,
-      defend: this.playerSlots.defend
-    }
-
-    this.socket.emit("playCards", {'player': this.player, 'move': move})
+  public submitAction() {
+    this.socket.emit("submitAction", {'playerSlot': ElementumGame.playerSlot, 'playerAction': this.playerAction})
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -140,25 +115,62 @@ export class AppComponent implements OnInit, AfterViewInit {
   mouseDown(event: MouseEvent | TouchEvent) {
     let cursorPosition = this.getCursorPosition(event)
 
-    console.log(`${cursorPosition.y} vs ${this.canvasClampY(cursorPosition.y)}`)
     if(cursorPosition.x != this.canvasClampX(cursorPosition.x)
     || cursorPosition.y != this.canvasClampY(cursorPosition.y)) {
         return
     }
 
-    this.grabbedEntity = this.cardCollection.getClicked(cursorPosition.x, cursorPosition.y, true)
+    let clickedEntity = this.entityCollection.getEntityAt(cursorPosition.x, cursorPosition.y)
 
-    if(this.grabbedEntity) {
-      this.grabbedOffsetX = cursorPosition.x - this.grabbedEntity.x_pos
-      this.grabbedOffsetY = cursorPosition.y - this.grabbedEntity.y_pos
-      this.grabbedEntity.draw(this.context)
+    if(clickedEntity == undefined) {
+      return
     }
+
+    if(clickedEntity.draggable == false) {
+      return
+    }
+
+    if(clickedEntity.playerSlot != ElementumGame.playerSlot) {
+      // TODO: play a bounce animation or something if you can't drag the entity
+      return
+    }
+
+    this.entityCollection.bringToFront(clickedEntity)
+    this.grabbedOffsetX = cursorPosition.x - clickedEntity.xPos
+    this.grabbedOffsetY = cursorPosition.y - clickedEntity.yPos
+    this.grabbedEntity = clickedEntity
+
+    // unsocket card from slot
+    if(clickedEntity instanceof CardEntity) {
+      for(const key of Object.keys(this.playerAction)) {
+        if(this.playerAction[key] == clickedEntity.cardType) {
+          this.playerAction[key] = undefined
+          break
+        }
+      }
+    }
+
+    console.log(clickedEntity)
   }
 
   @HostListener('touchend', ['$event'])
   @HostListener('touchcancel', ['$event'])
   @HostListener('window:mouseup', ['$event'])
   mouseUp(event: MouseEvent | TouchEvent) {
+    if(this.grabbedEntity instanceof CardEntity) {
+      let card = this.grabbedEntity
+      let entityBelow = this.entityCollection.getEntityBelow(card.xPos, card.yPos, this.grabbedEntity)
+      if(entityBelow && entityBelow instanceof CardSlotEntity && entityBelow.playerSlot == ElementumGame.playerSlot) {
+        let cardSlot = entityBelow as CardSlotEntity
+        if(this.playerAction[cardSlot.actionSlot] == undefined) {
+          this.playerAction[cardSlot.actionSlot] = card.cardType
+          card.xPos = cardSlot.xPos
+          card.yPos = cardSlot.yPos
+        }
+      }
+    }
+
+    // Let go of the draggable entity
     this.grabbedEntity = null
   }
 
@@ -172,22 +184,36 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     let cursorPosition = this.getCursorPosition(event)
-    this.grabbedEntity.x_pos = this.canvasClampX(cursorPosition.x - this.grabbedOffsetX)
-    this.grabbedEntity.y_pos = this.canvasClampY(cursorPosition.y - this.grabbedOffsetY)
-
-    this.reDraw()
+    this.grabbedEntity.xPos = this.canvasClampX(cursorPosition.x - this.grabbedOffsetX)
+    this.grabbedEntity.yPos = this.canvasClampY(cursorPosition.y - this.grabbedOffsetY)
   }
 
-  reDraw(){
+  reDraw(): void {
     this.context.clearRect(0, 0, this.gameCanvas.nativeElement.width, this.gameCanvas.nativeElement.height)
-    this.elementCollection.draw(this.context)
-    this.cardSlotCollection.draw(this.context)
-    this.cardCollection.draw(this.context)
+
+    // draw a dividing line
+    this.context.beginPath()
+    this.context.strokeStyle = "black"
+    this.context.lineTo(0, ElementumGame.canvasHeight/2)
+    this.context.lineTo(ElementumGame.canvasWidth, ElementumGame.canvasHeight/2)
+    this.context.stroke()
+
+    this.entityCollection.draw(this.context)
   }
-  updateElements(){
-    this.elementCollection.displayObjects.forEach(elem => {
-      elem.toggle = this.boardState[elem["board"]][elem["name"]]
+
+  updateElements(): void {
+    this.entityCollection.entities.forEach(entity => {
+      if(entity instanceof ElementEntity) {
+        let element = entity as ElementEntity
+        if(element.playerSlot == ElementumGame.playerSlot) {
+          element.activated = this.playerElements[element.elementName]
+          console.log(`set to ${element.activated}`)
+        }
+        else {
+          element.activated = this.enemyElements[element.elementName]
+          console.log(`set to ${element.activated}`)
+        }
+      }
     })
-    this.reDraw()
   }
 }

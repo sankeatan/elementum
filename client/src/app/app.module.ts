@@ -2,12 +2,12 @@ import { NgModule } from '@angular/core'
 import { BrowserModule } from '@angular/platform-browser'
 
 import { AppRoutingModule } from './app-routing.module'
-import { AppComponent } from './app.component'
+import { ElementumGame } from './app.component'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 
 @NgModule({
   declarations: [
-    AppComponent
+    ElementumGame
   ],
   imports: [
     BrowserModule,
@@ -15,6 +15,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
     BrowserAnimationsModule
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [ElementumGame]
 })
 export class AppModule { }
