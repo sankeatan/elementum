@@ -12,7 +12,7 @@ export class ElementCluster {
 }
 
 export class PlayerAction {
-  public attack1: CardType
-  public attack2: CardType
-  public defend: CardType
+  public attack1: CardType = undefined
+  public attack2: CardType = undefined
+  public defend: CardType = undefined
 }
