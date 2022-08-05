@@ -1,4 +1,4 @@
-import { PlayerSlot } from "../../../../shared/shared"
+import { PlayerSlot } from "../../../../../shared/shared"
 import { CanvasRender } from "../canvas/render"
 
 // https://stackoverflow.com/a/3368118/19585452

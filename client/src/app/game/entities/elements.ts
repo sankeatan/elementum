@@ -1,4 +1,4 @@
-import { ElementName, PlayerSlot } from '../../../../shared/shared'
+import { ElementName, PlayerSlot } from '../../../../../shared/shared'
 import { CanvasRender, CircleCanvasRender } from '../canvas/render'
 import { Entity } from './entities'
 

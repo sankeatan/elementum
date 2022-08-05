@@ -1,9 +1,28 @@
-canvas {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -o-user-select: none;
-    user-select: none;
+#router-container {
+    width: 50em;
+    margin: auto;
+    margin-top: 2em;
+}
+
+#router-nav-bar {
+    width: fit-content;
+    margin: auto;
+    display: flex;
+}
+
+#router-nav-bar a {
+    border: 1px solid darkred;
+    background-color: bisque;
+    padding: 1em;
+    margin-left: -1px;
+}
+
+#router-main {
+    border: 1px solid darkred;
+    background-color: bisque;
+}
+
+#router-footer {
+    border: 1px solid darkred;
+    background-color: beige;
 }

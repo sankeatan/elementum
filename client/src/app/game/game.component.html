@@ -1,0 +1,31 @@
+<div id="game-container" style="margin: auto; width: fit-content; padding-top: 2rem;">
+  <canvas
+    #game
+    style="border: 1px solid black">
+  </canvas>
+  <br>
+  <div style="margin: auto; width: fit-content;">
+    <ng-container *ngFor="let action of playerAction | keyvalue">
+      <div style="display: inline-block; margin: 0.5rem 2rem; text-align: center;">
+        <span><b>{{action.key}}</b></span><br>
+        <span *ngIf="action.value; else noAction">{{action.value}}</span>
+        <ng-template #noAction>None</ng-template>
+      </div>
+    </ng-container>
+  </div>
+  <button (click)="submitAction()">Submit</button>
+
+  <!-- <div>
+    <select #test2>
+      <option *ngFor="let item of hand" value={{item}}>{{item}}</option>
+    </select>
+  </div>
+
+  <div>
+    <select #test3>
+      <option *ngFor="let item of hand" value={{item}}>{{item}}</option>
+    </select>
+  </div> -->
+
+  <!-- <button (click)="move(slot1.value)">Submit</button> -->
+</div>
