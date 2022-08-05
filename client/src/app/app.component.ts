@@ -20,10 +20,8 @@ export class ElementumGame implements OnInit, AfterViewInit {
   private gameCanvas: ElementRef
 
   private context: CanvasRenderingContext2D
-  private contextBoundRight: number = 0
   private contextBoundLeft: number = 0
   private contextBoundTop: number = 0
-  private contextBoundBottom: number = 0
 
   private socket: Socket
 
@@ -60,10 +58,8 @@ export class ElementumGame implements OnInit, AfterViewInit {
 
   @HostListener('window:resize', ['$event'])
   private updateContextBounds() {
-    this.contextBoundRight = this.gameCanvas.nativeElement.getBoundingClientRect().right
     this.contextBoundLeft = this.gameCanvas.nativeElement.getBoundingClientRect().left
     this.contextBoundTop = this.gameCanvas.nativeElement.getBoundingClientRect().top
-    this.contextBoundBottom = this.gameCanvas.nativeElement.getBoundingClientRect().bottom
   }
 
   public ngAfterViewInit(): void {
