@@ -175,11 +175,12 @@ export class ElementumGame implements OnInit, AfterViewInit {
   @HostListener('touchmove', ['$event'])
   @HostListener('window:mousemove', ['$event'])
   mouseMove(event: MouseEvent | TouchEvent): void {
-    event.preventDefault()
-
     if(this.grabbedEntity == null) {
       return
     }
+
+    // prevent panning and zooming if we're moving an object
+    event.preventDefault()
 
     let cursorPosition = this.getCursorPosition(event)
     this.grabbedEntity.xPos = this.canvasClampX(cursorPosition.x - this.grabbedOffsetX)
