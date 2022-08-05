@@ -4,7 +4,7 @@ import { Entity, EntityCollection } from './entities/entities'
 import { clamp } from './utility'
 import { ElementCluster, PlayerAction, PlayerSlot } from '../../../../shared/shared'
 import { environment } from 'src/environments/environment.prod'
-import { initCards, initCardSlots, initElements } from './control/setup'
+import { initGame } from './control/loop'
 import { CardEntity } from './entities/cards'
 import { CardSlotEntity } from './entities/cardslots'
 import { ElementEntity } from './entities/elements'
@@ -76,9 +76,7 @@ export class GameComponent implements OnInit, AfterViewInit {
       this.updateElements()
     })
 
-    initElements(this.entityCollection)
-    initCardSlots(this.entityCollection)
-    initCards(this.entityCollection)
+    initGame(this.entityCollection)
 
     this.reDraw()
     setInterval(() => this.reDraw(), 1000/this.FPS)
