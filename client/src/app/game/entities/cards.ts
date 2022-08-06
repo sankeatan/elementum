@@ -1,7 +1,7 @@
 import { Entity } from './entities'
 import { CardType, ElementName, PlayerSlot } from '../../../../../shared/shared'
 import { RectangleCanvasRender } from '../canvas/render'
-import { GameComponent } from '../game.component'
+import { ElementumComponent } from '../elementum.component'
 
 export const cardProperties: {[key: string]: any} = {
   "fire": {
@@ -55,7 +55,7 @@ export class CardEntity extends Entity {
   public override render: RectangleCanvasRender
 
   constructor(xPos: number, yPos:number, cardType: CardType, playerSlot: PlayerSlot) {
-    let height = GameComponent.canvasHeight * .225
+    let height = ElementumComponent.canvasHeight * .225
     let width = height * .7159
     super(xPos, yPos, new RectangleCanvasRender(width, height, cardProperties[cardType].style))
     this.cardType = cardType

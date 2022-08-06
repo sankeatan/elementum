@@ -3,20 +3,20 @@ import { io, Socket } from 'socket.io-client'
 import { Entity, EntityCollection } from './entities/entities'
 import { clamp } from './utility'
 import { ElementCluster, PlayerAction, PlayerSlot } from '../../../../shared/shared'
-import { environment } from 'src/environments/environment.prod'
+import { environment } from 'src/environments/environment'
 import { initCards, initCardSlots, initElements } from './control/setup'
 import { CardEntity } from './entities/cards'
 import { CardSlotEntity } from './entities/cardslots'
 import { ElementEntity } from './entities/elements'
 
 @Component({
-  selector: 'app-game',
-  templateUrl: './game.component.html',
-  styleUrls: ['./game.component.css']
+  selector: 'app-elementum',
+  templateUrl: './elementum.component.html',
+  styleUrls: ['./elementum.component.css']
 })
 
-export class GameComponent implements OnInit, AfterViewInit {
-  @ViewChild("game")
+export class ElementumComponent implements OnInit, AfterViewInit {
+  @ViewChild("elementum")
   private gameCanvas: ElementRef
 
   private context: CanvasRenderingContext2D
@@ -40,7 +40,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   private FPS: number = 60
 
   public static readonly playerSlot: PlayerSlot = ['player1', 'player2'][Math.random() < 0.5 ? 0 : 1] as PlayerSlot // stupid thing that we'll obviously replace
-  public static readonly enemySlot: PlayerSlot = GameComponent.playerSlot == 'player1' ? 'player2' : 'player1'
+  public static readonly enemySlot: PlayerSlot = ElementumComponent.playerSlot == 'player1' ? 'player2' : 'player1'
 
   public readonly playerAction: PlayerAction = new PlayerAction()
 
@@ -64,21 +64,17 @@ export class GameComponent implements OnInit, AfterViewInit {
 
   public ngAfterViewInit(): void {
     this.context = this.gameCanvas.nativeElement.getContext("2d")
-    this.context.canvas.width = GameComponent.canvasWidth
-    this.context.canvas.height = GameComponent.canvasHeight
+    this.context.canvas.width = ElementumComponent.canvasWidth
+    this.context.canvas.height = ElementumComponent.canvasHeight
     this.updateContextBounds()
 
     this.socket.on("gameUpdate", (update: {[key:string]: ElementCluster}) => {
       console.log(this.playerElements)
       console.log(this.enemyElements)
-      this.playerElements = update[GameComponent.playerSlot]
-      this.enemyElements = update[GameComponent.enemySlot]
+      this.playerElements = update[ElementumComponent.playerSlot]
+      this.enemyElements = update[ElementumComponent.enemySlot]
       this.updateElements()
     })
-
-    initElements(this.entityCollection)
-    initCardSlots(this.entityCollection)
-    initCards(this.entityCollection)
 
     this.reDraw()
     setInterval(() => this.reDraw(), 1000/this.FPS)
@@ -99,7 +95,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
   
   public submitAction() {
-    this.socket.emit("submitAction", {'playerSlot': GameComponent.playerSlot, 'playerAction': this.playerAction})
+    this.socket.emit("submitAction", {'playerSlot': ElementumComponent.playerSlot, 'playerAction': this.playerAction})
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -126,7 +122,7 @@ export class GameComponent implements OnInit, AfterViewInit {
       return
     }
 
-    if(clickedEntity.playerSlot != GameComponent.playerSlot) {
+    if(clickedEntity.playerSlot != ElementumComponent.playerSlot) {
       // TODO: play a bounce animation or something if you can't drag the entity
       return
     }
@@ -157,7 +153,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     if(this.grabbedEntity instanceof CardEntity) {
       let card = this.grabbedEntity
       let entityBelow = this.entityCollection.getEntityBelow(card.xPos, card.yPos, this.grabbedEntity)
-      if(entityBelow && entityBelow instanceof CardSlotEntity && entityBelow.playerSlot == GameComponent.playerSlot) {
+      if(entityBelow && entityBelow instanceof CardSlotEntity && entityBelow.playerSlot == ElementumComponent.playerSlot) {
         let cardSlot = entityBelow as CardSlotEntity
         if(this.playerAction[cardSlot.actionSlot] == undefined) {
           this.playerAction[cardSlot.actionSlot] = card.cardType
@@ -193,8 +189,8 @@ export class GameComponent implements OnInit, AfterViewInit {
     // draw a dividing line
     this.context.beginPath()
     this.context.strokeStyle = "black"
-    this.context.lineTo(0, GameComponent.canvasHeight/2)
-    this.context.lineTo(GameComponent.canvasWidth, GameComponent.canvasHeight/2)
+    this.context.lineTo(0, ElementumComponent.canvasHeight/2)
+    this.context.lineTo(ElementumComponent.canvasWidth, ElementumComponent.canvasHeight/2)
     this.context.stroke()
 
     this.entityCollection.draw(this.context)
@@ -204,7 +200,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.entityCollection.entities.forEach(entity => {
       if(entity instanceof ElementEntity) {
         let element = entity as ElementEntity
-        if(element.playerSlot == GameComponent.playerSlot) {
+        if(element.playerSlot == ElementumComponent.playerSlot) {
           element.activated = this.playerElements[element.elementName]
           console.log(`set to ${element.activated}`)
         }
