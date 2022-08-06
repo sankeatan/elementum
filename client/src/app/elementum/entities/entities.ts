@@ -1,5 +1,5 @@
 import { PlayerSlot } from "../../../../../shared/shared"
-import { CanvasRender } from "../canvas/render"
+import { CanvasRender } from "../components/canvas/render"
 
 // https://stackoverflow.com/a/3368118/19585452
 export class EntityCollection {
