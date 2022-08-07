@@ -40,13 +40,13 @@ Socketio.on("connection", (socket: Socket) => {
             console.log("Processing complete.")
         }
     })
-    socket.on("newGame", (roomName) => {
+    socket.on("newGame", (roomName: string) => {
         socket.join(roomName);
         console.log(socket.data);
         console.log(socket.id);
     })
 
-    socket.on("joinGame", (roomName) => {
+    socket.on("joinGame", (roomName: string) => {
         socket.join(roomName);
         console.log(socket.data);
         console.log(socket.id);
