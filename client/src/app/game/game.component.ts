@@ -100,6 +100,16 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.socket.emit("submitAction", {'playerSlot': GameComponent.playerSlot, 'playerAction': this.playerAction})
   }
 
+  public newGame() {
+    let roomName = document.getElementById("room-name")['value']
+    this.socket.emit("newGame", roomName)
+  }
+
+  public joinGame() {
+    let roomName = document.getElementById("room-name")['value']
+    this.socket.emit("joinGame", roomName)
+  }
+
   @HostListener('window:keydown', ['$event'])
   keyEvent(event: KeyboardEvent) {
   }

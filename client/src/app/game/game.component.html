@@ -1,4 +1,7 @@
 <div id="game-container" style="margin: auto; width: fit-content; padding-top: 2rem;">
+  <button (click)="newGame()">New Game</button>
+  <button (click)="joinGame()">Join Game</button>
+  <input id="room-name" type="text" placeholder="Room Name">
   <canvas
     #game
     style="border: 1px solid black">
