@@ -1,5 +1,5 @@
 import { ElementName, PlayerSlot } from '../../../../../shared/shared'
-import { CanvasRender, CircleCanvasRender } from '../canvas/render'
+import { CanvasRender, CircleCanvasRender } from '../components/render'
 import { Entity } from './entities'
 
 export const elementProperties: {[key: string]: any} = {

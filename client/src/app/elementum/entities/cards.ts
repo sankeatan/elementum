@@ -1,6 +1,6 @@
 import { Entity } from './entities'
 import { CardType, ElementName, PlayerSlot } from '../../../../../shared/shared'
-import { RectangleCanvasRender } from '../components/canvas/render'
+import { RectangleCanvasRender } from '../components/render'
 import { ElementumComponent } from '../elementum.component'
 
 export const cardProperties: {[key: string]: any} = {

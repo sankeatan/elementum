@@ -1,4 +1,6 @@
 // TODO: add ability to round the edges of polygons:
+// https://stackoverflow.com/a/3368118/19585452
+
 type Style = {[key: string]: any}
 
 export abstract class CanvasRender {
@@ -173,3 +175,57 @@ export class RectangleCanvasRender extends PolygonCanvasRender {
 //         })
 //     }
 // }
+
+
+import { ComponentType } from "../../../../../shared/ECS/component"
+import { Entity } from "../../../../../shared/ECS/entity"
+
+export function drawOnCanvas(entities: Entity[], ctx: CanvasRenderingContext2D): void {
+    entities.forEach(entity => {
+        draw(entity, ctx)
+    })
+}
+
+function getEntity(entities: Entity[], x: number, y: number, ignoreEntity: Entity): Entity {
+    for(let i=entities.length-1; i>=0; i--) {
+        let clicked_obj = entities[i]
+        if(clicked_obj != ignoreEntity && isInside(clicked_obj, x, y)) {
+            return clicked_obj
+        }
+    }
+
+    return null
+}
+
+export function getEntityAt(entities: Entity[], x: number, y: number): Entity {
+    return getEntity(entities, x, y, null)
+}
+
+export function getEntityBelow(entities: Entity[], x: number, y: number, entity: Entity): Entity {
+    return getEntity(entities, x, y, entity)
+}
+
+export function bringToFront(entities: Entity[], entity: Entity) {
+    // move the clicked object to the end of the array
+    entities.push(entities.splice(entities.indexOf(entity),1)[0])
+}
+
+
+export function draw(entity: Entity, ctx: CanvasRenderingContext2D): void {
+    if(entity.componentsBitArray & (ComponentType.canvasStyle)
+}
+
+export function isInside(entity: Entity, x: number, y: number) {
+    let relative_x = x - xPos
+    let relative_y = y - yPos
+
+    if(boundingShape) {
+        return boundingShape.isInside(relative_x, relative_y)
+    }
+
+    return render.isInside(relative_x, relative_y)
+}
+
+export function rotate(entity: Entity, angle: number) {
+    rotate(angle)
+}

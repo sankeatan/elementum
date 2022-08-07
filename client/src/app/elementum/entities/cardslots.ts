@@ -1,5 +1,5 @@
 import { Entity } from './entities'
-import { RectangleCanvasRender } from '../canvas/render'
+import { RectangleCanvasRender } from '../components/render'
 import { ActionSlot, PlayerSlot } from '../../../../../shared/shared'
 
 export const cardProperties: {[key: string]: any} = {
