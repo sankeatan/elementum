@@ -1,31 +1,33 @@
 import { ElementName } from "../shared"
 
 // TODO: use or get rid of this
-// function* maskGenerator() {
-//     for (let i=0; i<31; i++) {
-//         yield 1 << i
-//     }
-// }
-// const maskGen = maskGenerator()
-
-// function nextMask() {
-//     let mask = maskGen.next().value
-//     if(!mask) {
-//         throw new Error("Bit mask limit exceeded")
-//     }
-//     else {
-//         return mask as number
-//     }
-// }
-
-export abstract class Component {
-    abstract bitmask: number
+function* indexGen() {
+    for (let i=0; i<31; i++) {
+        yield i
+    }
 }
 
-export abstract class com {
+const maskGen = indexGen()
+
+function nextIndex() {
+    let index = maskGen.next().value
+    if(!index) {
+        throw new Error("Index limit exceeded")
+    }
+    else {
+        return index as number
+    }
+}
+
+export abstract class Component {
+    abstract mask: () => number
+}
+
+export abstract class c {
     public static Position2D = class implements Component {
-        public static readonly sBitmask = 1 << 0
-        public readonly bitmask: number = com.Position2D.sBitmask
+        public static readonly index = nextIndex()
+        public static readonly mask = 1 << this.index
+        public readonly mask = c.Position2D.mask
         public x: number
         public y: number
 
@@ -36,8 +38,9 @@ export abstract class com {
     }
 
     public static ElementType = class implements Component {
-        public static readonly sBitmask = 1 << 1
-        public readonly bitmask: number = com.ElementType.sBitmask
+        public static readonly index = nextIndex()
+        public static readonly mask = 1 << this.index
+        public readonly mask = 1 << c.ElementType.mask
         public value: ElementName
 
         constructor(value: ElementName) {
@@ -46,8 +49,8 @@ export abstract class com {
     }
 
     public static BoundingBox = class implements Component {
-        public static readonly sBitmask = 1 << 2
-        public readonly bitmask: number = com.BoundingBox.sBitmask
+        public static readonly index = nextIndex()
+        public mask = 1 << c.BoundingBox.mask
         public value: any
 
         constructor(value: any) {
@@ -56,8 +59,9 @@ export abstract class com {
     }
 
     public static ClickEvent = class implements Component {
-        public static readonly sBitmask = 1 << 3
-        public readonly bitmask: number = com.ClickEvent.sBitmask
+        public static readonly index = nextIndex()
+        public static readonly mask = 1 << this.index
+        public readonly mask = 1 << c.ClickEvent.mask
         public value: any
 
         constructor(value: any) {
@@ -66,8 +70,9 @@ export abstract class com {
     }
 
     public static FrameRender = class implements Component {
-        public static readonly sBitmask = 1 << 4
-        public readonly bitmask: number = com.FrameRender.sBitmask
+        public static readonly index = nextIndex()
+        public static readonly mask = 1 << this.index
+        public readonly mask = 1 << c.FrameRender.mask
         public value: any
 
         constructor(value: any) {
@@ -76,8 +81,9 @@ export abstract class com {
     }
 
     public static Slot = class implements Component {
-        public static readonly sBitmask = 1 << 5
-        public readonly bitmask: number = com.Slot.sBitmask
+        public static readonly index = nextIndex()
+        public static readonly mask = 1 << this.index
+        public readonly mask = 1 << c.Slot.mask
         public value: any
 
         constructor(value: any) {
@@ -86,8 +92,9 @@ export abstract class com {
     }
 
     public static CanvasStyle = class implements Component {
-        public static readonly sBitmask = 1 << 6
-        public readonly bitmask: number = com.CanvasStyle.sBitmask
+        public static readonly index = nextIndex()
+        public static readonly mask = 1 << this.index
+        public readonly mask = 1 << c.CanvasStyle.mask
         public value: any
 
         constructor(value: any) {
@@ -96,8 +103,9 @@ export abstract class com {
     }
 
     public static Vertices2D = class implements Component {
-        public static readonly sBitmask = 1 << 7
-        public readonly bitmask: number = com.Vertices2D.sBitmask
+        public static readonly index = nextIndex()
+        public static readonly mask = 1 << this.index
+        public readonly mask = 1 << c.Vertices2D.mask
         public value: any
 
         constructor(value: any) {
@@ -105,4 +113,4 @@ export abstract class com {
         }
     }
 }
-let x = new com.BoundingBox(3)
+let x = new c.BoundingBox(3)
