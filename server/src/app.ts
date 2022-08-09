@@ -1,9 +1,12 @@
 import { Socket } from 'socket.io'
-import { CardType, ElementCluster, ElementName, PlayerAction, PlayerSlot } from '../../shared/shared'
+import { CardType, ElementCluster, PlayerAction, PlayerSlot } from '../../shared/shared'
+import { EntityManager } from '../../shared/ECS/ecs'
 
 const Express = require("express")()
 const Http = require("http").Server(Express)
 const Socketio = require("socket.io")(Http)
+
+var entityManager = new EntityManager()
 
 var game = {
     "player1": new ElementCluster(),

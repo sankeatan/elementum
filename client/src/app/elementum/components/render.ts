@@ -147,22 +147,14 @@ export class PolygonCanvasRender extends SimpleCanvasRender {
     }
 }
 
-export class RectangleCanvasRender extends PolygonCanvasRender {
-    // TODO: allow modification of width and height
-    public readonly width: number
-    public readonly height: number
-
-    constructor(width: number, height: number, style?: Style) {
-        let vertices: [x: number, y: number][] = [
-            [-width/2, -height/2],
-            [width/2, -height/2],
-            [width/2, height/2],
-            [-width/2, height/2],
-        ]
-        super(vertices, style)
-        this.width = width
-        this.height = height
-    }
+export function getRectangleVertices(width: number, height: number) {
+    let vertices: [x: number, y: number][] = [
+        [-width/2, -height/2],
+        [width/2, -height/2],
+        [width/2, height/2],
+        [-width/2, height/2],
+    ]
+    return vertices
 }
 
 // export class ImageCanvasRender implements CanvasRender {
@@ -212,7 +204,7 @@ export function bringToFront(entities: Entity[], entity: Entity) {
 
 
 export function draw(entity: Entity, ctx: CanvasRenderingContext2D): void {
-    if(entity.componentsBitArray & (ComponentType.canvasStyle)
+    if(entity.componentsMask & (ComponentType.canvasStyle)
 }
 
 export function isInside(entity: Entity, x: number, y: number) {

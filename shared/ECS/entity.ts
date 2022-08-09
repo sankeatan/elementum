@@ -1,22 +1,6 @@
-import { Component, com } from "./component";
-
-export const ComponentSet = {
-    position2d: {
-        x: 0,
-        y: 0
-    },
-    elementType: {},
-    boundingBox: {},
-    clickEvents: {},
-    frameRender: {},
-    slot: {},
-    canvasStyle: {},
-    vertices2D: {},
-}
+import { Component, c } from "./component";
 
 export class Entity {
-    public componentsBitArray: number
-    public readonly components: typeof 
+    public componentsMask: number
+    public readonly components: {[key: number]: Component}
 }
-
-let x:Component = new com.BoundingBox(3)

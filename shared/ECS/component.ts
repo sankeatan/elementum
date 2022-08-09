@@ -20,7 +20,7 @@ function nextIndex() {
 }
 
 export abstract class Component {
-    abstract mask: () => number
+    abstract mask: number
 }
 
 export abstract class c {
