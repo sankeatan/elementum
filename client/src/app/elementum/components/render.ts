@@ -1,5 +1,7 @@
 // TODO: add ability to round the edges of polygons:
 // https://stackoverflow.com/a/3368118/19585452
+import { c } from '../../../../../shared/ECS/component'
+import { System } from '../../../../../shared/ECS/system'
 
 type Style = {[key: string]: any}
 
@@ -204,18 +206,21 @@ export function bringToFront(entities: Entity[], entity: Entity) {
 
 
 export function draw(entity: Entity, ctx: CanvasRenderingContext2D): void {
-    if(entity.componentsMask & (ComponentType.canvasStyle)
+    if(entity.componentsMask & (ComponentType.canvasStyle) {
+        ;
+    }
 }
 
-export function isInside(entity: Entity, x: number, y: number) {
-    let relative_x = x - xPos
-    let relative_y = y - yPos
+export function isInside(entity: {c: {}}, targetX: number, targetY: number) {
+    let relativeX = targetX - xPos
+    let relativeY = targetY - yPos
 
-    if(boundingShape) {
-        return boundingShape.isInside(relative_x, relative_y)
+    if(entity.match(c.BoundingBox.mask)) {
+        return boundingShape.isInside(relativeX, relativeY)
     }
+    else if(entity.match(c.FrameRender.mask))
 
-    return render.isInside(relative_x, relative_y)
+    return render.isInside(relativeX, relativeY)
 }
 
 export function rotate(entity: Entity, angle: number) {

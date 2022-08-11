@@ -1,4 +1,5 @@
 import { ElementName } from "../shared"
+import { Entity } from "./entity"
 
 // TODO: use or get rid of this
 function* indexGen() {
@@ -24,10 +25,10 @@ export abstract class Component {
 }
 
 export abstract class c {
-    public static Position2D = class implements Component {
+    public static Position = class implements Component {
         public static readonly index = nextIndex()
         public static readonly mask = 1 << this.index
-        public readonly mask = c.Position2D.mask
+        public readonly mask = c.Position.mask
         public x: number
         public y: number
 
@@ -48,9 +49,9 @@ export abstract class c {
         }
     }
 
-    public static BoundingBox = class implements Component {
+    public static BoundingShape = class implements Component {
         public static readonly index = nextIndex()
-        public mask = 1 << c.BoundingBox.mask
+        public mask = 1 << c.BoundingShape.mask
         public value: any
 
         constructor(value: any) {
@@ -58,10 +59,10 @@ export abstract class c {
         }
     }
 
-    public static ClickEvent = class implements Component {
+    public static EventHandler = class implements Component {
         public static readonly index = nextIndex()
         public static readonly mask = 1 << this.index
-        public readonly mask = 1 << c.ClickEvent.mask
+        public readonly mask = 1 << c.EventHandler.mask
         public value: any
 
         constructor(value: any) {
@@ -69,10 +70,10 @@ export abstract class c {
         }
     }
 
-    public static FrameRender = class implements Component {
+    public static Renderer = class implements Component {
         public static readonly index = nextIndex()
         public static readonly mask = 1 << this.index
-        public readonly mask = 1 << c.FrameRender.mask
+        public readonly mask = 1 << c.Renderer.mask
         public value: any
 
         constructor(value: any) {
@@ -84,33 +85,12 @@ export abstract class c {
         public static readonly index = nextIndex()
         public static readonly mask = 1 << this.index
         public readonly mask = 1 << c.Slot.mask
-        public value: any
+        public occupant: Entity | null = null
 
-        constructor(value: any) {
-            this.value = value
-        }
-    }
-
-    public static CanvasStyle = class implements Component {
-        public static readonly index = nextIndex()
-        public static readonly mask = 1 << this.index
-        public readonly mask = 1 << c.CanvasStyle.mask
-        public value: any
-
-        constructor(value: any) {
-            this.value = value
-        }
-    }
-
-    public static Vertices2D = class implements Component {
-        public static readonly index = nextIndex()
-        public static readonly mask = 1 << this.index
-        public readonly mask = 1 << c.Vertices2D.mask
-        public value: any
-
-        constructor(value: any) {
-            this.value = value
+        constructor(initialOccupant?: Entity) {
+            if(initialOccupant) {
+                this.occupant = initialOccupant
+            }
         }
     }
 }
-let x = new c.BoundingBox(3)
