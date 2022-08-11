@@ -44,30 +44,12 @@ export abstract class SimpleCanvasRender extends CanvasRender{
     protected abstract drawShape(ctx: CanvasRenderingContext2D, x: number, y: number): void
 }
 
-export class CircleCanvasRender extends SimpleCanvasRender {
-    public radius: number
-    private rotation: number // TODO: use this to rotate gradient
-
-    constructor(radius: number, style?: Style) {
-        super(style)
-        this.radius = radius
-    }
-
-    public isInside(x: number, y: number): boolean {
-        return Math.pow((x),2) + Math.pow((y),2) <= Math.pow(this.radius,2)
-    }
-
-    protected drawShape(ctx: CanvasRenderingContext2D, x: number, y: number): void {
-        this.applyStyle(ctx)
-        ctx.beginPath()
-        ctx.arc(x, y, this.radius, 0, 2*Math.PI)
-        ctx.stroke()
-        ctx.fill()
-    }
-
-    public rotate(angle: number): void {
-        this.rotation = (this.rotation + angle) % (2*Math.PI)
-    }
+function drawCircle(ctx: CanvasRenderingContext2D, x: number, y: number): void {
+    this.applyStyle(ctx)
+    ctx.beginPath()
+    ctx.arc(x, y, this.radius, 0, 2*Math.PI)
+    ctx.stroke()
+    ctx.fill()
 }
 
 export class PolygonCanvasRender extends SimpleCanvasRender {
